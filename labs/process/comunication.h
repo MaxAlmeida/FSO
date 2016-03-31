@@ -6,6 +6,7 @@ extern int errno;
 #define SHM_LEN  250
 #define TEXT_LEN 250
 
+int mem_id;
 typedef struct msg_buf{
   int type;
   char text[TEXT_LEN];
@@ -63,6 +64,7 @@ int shm_create(key_t key){
 }
 
 char* shm_attach(int shmid){
+  printf("executando atachh\n\n");
   char* shm = shmat(shmid, NULL, 0);
   if(shm == (char *) -1){
     elog("Failed to attach memory!");
@@ -71,17 +73,24 @@ char* shm_attach(int shmid){
   return shm;
 }
 
-void shm_send(Msg* msg, char* shm){
-  shm = msg->text;
+void shm_send(Msg msg, char* shm){
+  //strcpy(shm, "funfaaaa");
+  strcpy(shm, msg.text);
+  printf("Ataaaaaach  %s\n\n",shm);
 }
 
 void shm_process(){
   key_t key = 5678;
   int shmid = shm_create(key);
+  mem_id = shmid; 
   char* shm = shm_attach(shmid);
 
   Msg msg_send;
   strcpy(msg_send.text,"YEAH!");
   msg_send.type = 0;
-  shm_send(&msg_send,shm);
+  shm_send(msg_send,shm);
+}
+
+int return_mem_id(){
+  return mem_id;
 }
