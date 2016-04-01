@@ -21,9 +21,9 @@ int main(int argc, char* argv[]){
   int pid = fork();
 
   if(pid > 0){ // Parent
-    parent(qid);
+    parent_a(qid);
   }else if(pid == 0){ // Child
-    child(qid);
+    child_a(qid);
   } else if(pid < 0){ // Fail
     printf("Failed to create process!\n", pid);
     exit(-1);

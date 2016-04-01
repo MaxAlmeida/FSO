@@ -12,16 +12,22 @@
 #include "process.h"
 
 int main(int argc, char* argv[]){
-  
-  key_t key = 5678;
-  int mem_id = shm_get(key);
-  char* shm;
-  if ((shm = shmat(mem_id, (void *)0, 0)) == (char *) -1) {
-        perror("shmat");
-        exit(1);
-    }
-  printf(">>>> %d\n\n",mem_id);
-  printf("Lido na memoria: %s\n",shm);
- 
+  int qid = create_queue();
+  int pid = fork();
+
+  if(pid > 0){
+    parent_b(qid);
+  }else if(pid == 0){
+    child_b(qid);
+  }else if(pid < 0){
+    printf("Failed to create process!\n",pid);
+    exit(-1);
+  } 
+  //key_t key = 5678;
+  //int mem_id = shm_get(key);
+  //char* shm = shm_attach(mem_id);
+  //printf(">>>> %d\n\n",mem_id);
+  // printf("Lido na memoria: %s\n",shm);
+
 
 }
