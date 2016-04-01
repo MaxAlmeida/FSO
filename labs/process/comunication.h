@@ -69,7 +69,7 @@ int shm_get(key_t key){
     elog("Failed to create share memory!");
     mlog(strerror(errno));
   }else{
-    printf("Shared memory %d created!\n",shmid);
+    printf("Shared memory %d connected!\n",shmid);
   }
   return shmid; 
 }
@@ -90,10 +90,9 @@ void shm_send(Msg msg, char* shm){
   printf("Ataaaaaach  %s\n\n",shm);
 }
 
-void shm_process(Msg msg_send){
+void shm_write_process(Msg msg_send){
   key_t key = 5678;
   int shmid = shm_create(key);
-  mem_id = shmid; 
   char* shm = shm_attach(shmid);
 
   //Msg msg_send;
@@ -102,6 +101,14 @@ void shm_process(Msg msg_send){
   shm_send(msg_send,shm);
 }
 
+char* shm_read_process(){
+  key_t key = 5678;
+  int shmid = shm_get(key);
+  char* shm = shm_attach(shmid); 
+  //Printf("Lido da memoria: %s\n",shm);
+ return shm;
+  
+}
 int return_mem_id(){
   return mem_id;
 }
