@@ -58,13 +58,11 @@ int main(int argc, char *argv[]) {
 	if (pid < 0)
 	   fprintf(stdout, "Falha na criacao do processo filho!\n");
 	else if (pid == 0) { /* processo filho */
-		close (sd); /* encerra o socket sd */
 		printf("Cliente %s: %u conectado.\n", inet_ntoa(endCli.sin_addr), ntohs(endCli.sin_port)); 
 		atende_cliente(novo_sd, endCli);
 		exit(0);
 	} /* fim else-if */
 	/* processo pai */
-	close (novo_sd);
   } /* fim for */
 } /* fim do programa */
 
@@ -76,7 +74,6 @@ int atende_cliente(int descritor, struct sockaddr_in endCli)  {
 	n = recv(descritor, &bufin, sizeof(bufin),0);
 	if (strncmp(bufin, "FIM", 3) == 0)
             break;
-	printf("[%s:%u] => %s\n", inet_ntoa(endCli.sin_addr), ntohs(endCli.sin_port), bufin);
    } /* fim while */
    printf("Encerrando conexao com %s:%u ...\n", inet_ntoa(endCli.sin_addr), ntohs(endCli.sin_port));
    close (descritor);
