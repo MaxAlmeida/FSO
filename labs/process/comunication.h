@@ -63,6 +63,17 @@ int shm_create(key_t key){
   return shmid;
 }
 
+int shm_get(key_t key){
+  int shmid = shmget(key, SHM_LEN, 0666);
+  if(shmid < 0){
+    elog("Failed to create share memory!");
+    mlog(strerror(errno));
+  }else{
+    printf("Shared memory %d created!\n",shmid);
+  }
+  return shmid; 
+}
+
 char* shm_attach(int shmid){
   printf("executando atachh\n\n");
   char* shm = shmat(shmid, NULL, 0);
@@ -79,14 +90,14 @@ void shm_send(Msg msg, char* shm){
   printf("Ataaaaaach  %s\n\n",shm);
 }
 
-void shm_process(){
+void shm_process(Msg msg_send){
   key_t key = 5678;
   int shmid = shm_create(key);
   mem_id = shmid; 
   char* shm = shm_attach(shmid);
 
-  Msg msg_send;
-  strcpy(msg_send.text,"YEAH!");
+  //Msg msg_send;
+  //strcpy(msg_send.text,"YEAH!");
   msg_send.type = 0;
   shm_send(msg_send,shm);
 }

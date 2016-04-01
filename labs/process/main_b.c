@@ -14,7 +14,7 @@
 int main(int argc, char* argv[]){
   
   key_t key = 5678;
-  int mem_id = shmget(key, 250, 0666);
+  int mem_id = shm_get(key);
   char* shm;
   if ((shm = shmat(mem_id, (void *)0, 0)) == (char *) -1) {
         perror("shmat");
