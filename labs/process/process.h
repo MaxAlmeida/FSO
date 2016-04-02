@@ -7,12 +7,10 @@ void child_a(int qid){
   shm_write_process(msg_rcv);
 }
 
-void parent_a(int qid){
-  Msg msg_send;
+void parent_a(Msg* msg, int qid){
   int status;
-  msg_send.type = 0;
-  strcpy(msg_send.text, "Testando Mensagem");
-  send_msg(&msg_send,qid);
+  printf(">>%s\n", msg->text);
+  send_msg(msg,qid);
   wait(&status);
   remove_queue(qid);
 }
