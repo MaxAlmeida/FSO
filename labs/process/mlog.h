@@ -3,10 +3,6 @@ void dlog(char* msg){
   printf("BUG: %s\n",msg);
 }
 
-void slog(char* msg){
-  printf("LOG: %s\n",msg);
-}
-
 void elog(char* msg){
   printf("ERROR: %s\n",msg);
 }
