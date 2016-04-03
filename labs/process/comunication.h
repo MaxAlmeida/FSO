@@ -35,14 +35,20 @@ void send_msg(Msg* msg, int qid){
   }
 }
 
-void read_msg(Msg* msg, int qid){
+int read_msg(Msg* msg, int qid){
   int status = msgrcv(qid, msg, sizeof(msg->text),0,0);
   if(status < 0){
-    elog("Failed to receive message!");
+    elog("There are no messages on the queues ");
     mlog(strerror(errno));
   }
+  return status;
 }
 
+int check_msg(int qid){
+  struct msqid_ds buf;
+  int status = msgctl(qid, IPC_STAT, &buf);
+  printf("\n---%d---\n", status);
+}
 void remove_queue(int qid){
   int status = msgctl(qid, IPC_RMID, NULL);
   if(status < 0){
@@ -66,10 +72,7 @@ int shm_create(key_t key){
 int shm_get(key_t key){
   int shmid = shmget(key, SHM_LEN, 0666);
   if(shmid < 0){
-    elog("Failed to create share memory!");
-    mlog(strerror(errno));
-  }else{
-    printf("Shared memory %d connected!\n",shmid);
+    mlog("No message on shared memory!");
   }
   return shmid; 
 }

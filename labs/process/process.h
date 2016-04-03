@@ -1,19 +1,33 @@
 
 void child_a(int qid){
-  Msg msg_rcv;
-  read_msg(&msg_rcv,qid);
-  printf("Message Received:\n%s\n",msg_rcv.text);
-
-  shm_write_process(msg_rcv);
+  key_t key = 5678;
+  check_msg(qid);
+  if(shm_get(key) < 0 && check_msg(qid) >= 0){
+    dlog("Entrando no while");
+    Msg msg_rcv;
+    read_msg(&msg_rcv,qid);
+    printf("Message Received:\n%s\n",msg_rcv.text);
+    shm_write_process(msg_rcv);
+  }
+  dlog("end while"); 
+  check_msg(qid);
 }
 
-void parent_a(Msg* msg, int qid){
-  int status;
-  printf(">>%s\n", msg->text);
-  send_msg(msg,qid);
-  send_msg(msg,qid);
-  wait(&status);
-  //remove_queue(qid);
+void parent_a(int qid){
+  char message[250];
+ 
+  printf("Enter the message: \n");
+  while(scanf("%s", message)){
+    Msg msg_send;
+    msg_send.type = 0;
+    strcpy(msg_send.text, message); 
+    int status;
+   // printf(">>%s\n", msg_send->text);
+    send_msg(&msg_send,qid);
+    send_msg(&msg_send,qid);
+    wait(&status);
+  }
+    //remove_queue(qid);
 }
 
 void child_b(int qid){
