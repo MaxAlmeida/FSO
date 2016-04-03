@@ -15,8 +15,13 @@ frntp();
 #include "comunication.h"
 #include "process.h"
 
-int main(int argc, char* argv[]){
+#define DEBUG "--debug"
+#define TCP "--tcp"
+bool EN_TCP = false;
 
+void flags(int argc, char* argv[]);
+
+int main(int argc, char* argv[]){
   int qid = create_queue();
   int pid = fork();
 
@@ -30,3 +35,16 @@ int main(int argc, char* argv[]){
   }
 
 } // fim-main
+
+void flags(int argc, char* argv[]){
+  int i = 0;
+  if(argc > 1){
+    for(i=1;i<argc;i++){
+      if(!strcmp(DEBUG,argv[i]))
+        EN_LOG = true;
+      if(!strcmp(TCP,argv[i]))
+        EN_TCP = true;
+    }
+  }
+}
+

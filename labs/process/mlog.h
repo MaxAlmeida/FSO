@@ -1,13 +1,18 @@
+#include <stdbool.h>
+bool EN_LOG=false;
 
 void dlog(char* msg){
-  printf("BUG: %s\n",msg);
+  if(EN_LOG)
+    printf("BUG: %s\n",msg);
 }
 
 void elog(char* msg){
-  printf("ERROR: %s\n",msg);
+  if(EN_LOG)
+    printf("ERROR: %s\n",msg);
 }
 
 void mlog(char* msg){
-  printf("MSG: %s\n",msg);
+  if(EN_LOG)
+    printf("MSG: %s\n",msg);
 }
 
