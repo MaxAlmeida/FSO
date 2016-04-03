@@ -11,11 +11,13 @@ void parent_a(Msg* msg, int qid){
   int status;
   printf(">>%s\n", msg->text);
   send_msg(msg,qid);
+  send_msg(msg,qid);
   wait(&status);
-  remove_queue(qid);
+  //remove_queue(qid);
 }
 
 void child_b(int qid){
+  key_t key = 5678; 
   printf("Cheguei no filho B com esse qid %d\n\n",qid);
   Msg msg_send;
   int status;
@@ -25,6 +27,8 @@ void child_b(int qid){
   strcpy(msg_send.text,shm);
   send_msg(&msg_send,qid);
   wait(&status);
+  int shmid = shm_get(key);
+  clear_memmory(shm,shmid);
   remove_queue(qid);
 }
 

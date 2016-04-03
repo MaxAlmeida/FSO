@@ -109,6 +109,19 @@ char* shm_read_process(){
  return shm;
   
 }
+
+void clear_memmory(char* shm, int shmid)
+{
+  if (shmdt(shm) == -1) {
+        printf("Don't detach");
+        perror("shmdt");
+        exit(1);
+    }
+
+  shmctl(shmid, IPC_RMID, NULL);
+  
+}
+
 int return_mem_id(){
   return mem_id;
 }
