@@ -5,6 +5,7 @@ frntp();
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<stdbool.h>
 
 #include<sys/msg.h>
 #include<sys/errno.h>
@@ -17,6 +18,7 @@ frntp();
 
 #define DEBUG "--debug"
 #define TCP "--tcp"
+
 bool EN_TCP = false;
 
 void flags(int argc, char* argv[]);
@@ -24,7 +26,6 @@ void flags(int argc, char* argv[]);
 int main(int argc, char* argv[]){
   int qid = create_queue();
   int pid = fork();
-
   if(pid > 0){ // Parent
     parent_a(qid);
   }else if(pid == 0){ // Child

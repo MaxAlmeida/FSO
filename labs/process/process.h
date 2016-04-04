@@ -1,33 +1,29 @@
-
 void child_a(int qid){
   key_t key = 5678;
-  check_msg(qid);
-  if(shm_get(key) < 0 && check_msg(qid) >= 0){
-    dlog("Entrando no while");
-    Msg msg_rcv;
-    read_msg(&msg_rcv,qid);
-    printf("Message Received:\n%s\n",msg_rcv.text);
-    shm_write_process(msg_rcv);
-  }
-  dlog("end while"); 
-  check_msg(qid);
+  Msg msg_rcv;
+  strcpy(msg_rcv.text, "lll123\t");
+  shm_write_process(msg_rcv);
+  do{
+    char* check = shm_read_process();
+    printf("--%s--\n",check);
+    if(strcmp(check,"lll123")){  
+      read_msg(&msg_rcv,qid);
+      shm_write_process(msg_rcv);
+    }
+  }while(strcmp(msg_rcv.text,"EXIT"));
 }
 
 void parent_a(int qid){
-  char message[250];
- 
-  printf("Enter the message: \n");
-  while(scanf("%s", message)){
-    Msg msg_send;
+  int status;
+  Msg msg_send;
+  // Loop to read input from user
+  do{
     msg_send.type = 0;
-    strcpy(msg_send.text, message); 
-    int status;
-   // printf(">>%s\n", msg_send->text);
+    strcpy(msg_send.text, user_input());
     send_msg(&msg_send,qid);
-    send_msg(&msg_send,qid);
-    wait(&status);
-  }
-    //remove_queue(qid);
+  } while(strcmp(msg_send.text,"EXIT"));
+  wait(&status);
+  remove_queue(qid);
 }
 
 void child_b(int qid){
@@ -38,16 +34,19 @@ void child_b(int qid){
   msg_send.type = 0;
   char* shm = shm_read_process();
   printf("Filho B - 'Lido da memória essa mensagem: %s'\n",shm);
+
+  Msg msg_check;
+  msg_check.type = 0;
+  strcpy(msg_check.text,"lll123");
+  shm_write_process(msg_check);
+
   strcpy(msg_send.text,shm);
   send_msg(&msg_send,qid);
-  wait(&status);
-  int shmid = shm_get(key);
-  clear_memmory(shm,shmid);
   remove_queue(qid);
 }
 
 void parent_b(int qid){
-  Msg msg_rcv;
-  read_msg(&msg_rcv,qid);
-  printf("Pai B - 'Recebi essa mensagem do meu filho: %s'\n",msg_rcv.text); 
+//  Msg msg_rcv;
+//  read_msg(&msg_rcv,qid);
+//  printf("Pai B - 'Recebi essa mensagem do meu filho: %s'\n",msg_rcv.text); 
 }
