@@ -100,7 +100,8 @@ void shm_send(Msg msg, char* shm){
 
 void shm_write_process(Msg msg_send){
   key_t key = 5678;
-  int shmid = shm_create(key);
+ // int shmid = shm_create(key);
+  int shmid = shm_get(key);
   char* shm = shm_attach(shmid);
   msg_send.type = 0;
   shm_send(msg_send,shm);

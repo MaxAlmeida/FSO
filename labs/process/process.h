@@ -1,19 +1,23 @@
 void child_a(int qid){
   key_t key = 5678;
   Msg msg_rcv;
-  strcpy(msg_rcv.text, "lll123\t");
-  shm_write_process(msg_rcv);
+  printf("Estou no filho a\n\n");
+  
+ // strcpy(msg_rcv.text, "lll123\t");
+ // shm_write_process(msg_rcv);
   do{
     char* check = shm_read_process();
-    printf("--%s--\n",check);
-    if(strcmp(check,"lll123")){  
+    sleep(1);
+    if(!strcmp(check,"77")){
       read_msg(&msg_rcv,qid);
+      printf("Entrei no if e recbi essa mensagem %s",msg_rcv.text); 
       shm_write_process(msg_rcv);
     }
   }while(strcmp(msg_rcv.text,"EXIT"));
 }
 
 void parent_a(int qid){
+  printf("Estou no pai A!\n\n");
   int status;
   Msg msg_send;
   // Loop to read input from user
@@ -37,7 +41,7 @@ void child_b(int qid){
 
   Msg msg_check;
   msg_check.type = 0;
-  strcpy(msg_check.text,"lll123");
+  strcpy(msg_check.text,"77");
   shm_write_process(msg_check);
 
   strcpy(msg_send.text,shm);
