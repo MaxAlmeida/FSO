@@ -6,9 +6,18 @@ void dlog(char* msg){
     printf("BUG: %s\n",msg);
 }
 
-void elog(char* msg){
+void dilog(char* msg, int arg){
   if(EN_LOG)
-    printf("ERROR: %s\n",msg);
+    printf("BUG: %s : %d\n",msg,arg);
+}
+
+void dmlog(char* msg, char* arg){
+  if(EN_LOG)
+    printf("BUG: %s : %s\n",msg,arg);
+}
+
+void elog(char* msg){
+  printf("ERROR: %s\n",msg);
 }
 
 void mlog(char* msg){

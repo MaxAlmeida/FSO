@@ -31,7 +31,7 @@ int create_queue(){
     elog("Failed to create queue!");
     mlog(strerror(errno));
   } else {
-    printf("Message queue %d created!\n", qid);
+    dilog("Message queue created! Queue ID", qid);
   }
   return qid;
 }
@@ -42,14 +42,14 @@ void send_msg(Msg* msg, int qid){
     elog("Failed to send message!");
     mlog(strerror(errno));
   }else{
-    printf("Message Sended!\n");
+    dlog("Message Sended!\n");
   }
 }
 
 int read_msg(Msg* msg, int qid){
   int status = msgrcv(qid, msg, sizeof(msg->text),0,0);
   if(status < 0){
-    elog("There are no messages on the queues ");
+    elog("There are no messages on the queues!");
     mlog(strerror(errno));
   }
   return status;
@@ -72,7 +72,7 @@ int shm_create(key_t key){
     elog("Failed to create share memory!");
     mlog(strerror(errno));
   }else{
-    printf("Shared memory %d created!\n", shmid);
+    dilog("Shared memory created! Shm ID", shmid);
   }
   return shmid;
 }
@@ -100,7 +100,6 @@ void shm_send(Msg msg, char* shm){
 
 void shm_write_process(Msg msg_send){
   key_t key = 5678;
- // int shmid = shm_create(key);
   int shmid = shm_get(key);
   char* shm = shm_attach(shmid);
   msg_send.type = 0;
@@ -116,8 +115,7 @@ char* shm_read_process(){
 
 void clear_memmory(char* shm, int shmid){
   if (shmdt(shm) == -1) {
-        printf("Don't detach");
-        perror("shmdt");
+        dlog("Don't detach");
         exit(1);
     }
   shmctl(shmid, IPC_RMID, NULL); 
