@@ -1,7 +1,3 @@
-/*
-select();
-frntp();
-*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
@@ -24,12 +20,13 @@ bool EN_TCP = false;
 void flags(int argc, char* argv[]);
 
 int main(int argc, char* argv[]){
+  flags(argc,argv);
   int qid = create_queue();
   int pid = fork();
   Msg msg_check;
-  key_t key = 5678;
+  key_t key = KEY;
   int shmid = shm_create(key);
-  strcpy(msg_check.text, "77");
+  strcpy(msg_check.text, CODE);
   shm_write_process(msg_check);
   if(pid > 0){ // Parent
     parent_a(qid);

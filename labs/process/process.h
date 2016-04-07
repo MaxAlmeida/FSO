@@ -1,4 +1,4 @@
-#define CODE "8892x99"
+#define CODE "889299"
 #define KEY 5678
 
 void parent_a(int qid){
@@ -26,33 +26,47 @@ void child_a(int qid){
     sleep(1);
     if(!strcmp(check,CODE)){
       read_msg(&msg_rcv,qid);
-      dmlog("Shm has sender code!", msg_rcv.text);
       shm_write_process(msg_rcv);
+      dmlog("Shm has sender code!", msg_rcv.text);
     }
   }while(strcmp(msg_rcv.text,"EXIT"));
 }
 
 void parent_b(int qid){
+  dlog(":: Parent B EXEC ::");
+  int status;
   Msg msg_rcv;
-  read_msg(&msg_rcv,qid);
-  dmlog(":: Parent B :: Recive the message", msg_rcv.text);
+  do{
+    read_msg(&msg_rcv,qid);
+    printf("[msg]> %s\n", msg_rcv.text);
+  }while(strcmp(msg_rcv.text,"EXIT"));
+  wait(&status);
 }
 
 void child_b(int qid){
   dlog(":: Child B EXEC ::");
-  key_t key = KEY; 
-  Msg msg_send;
+  key_t key = KEY;
   int status;
-  msg_send.type = 0;
+  Msg msg_send;
+  Msg check;
+
+  check.type = 0;
+  strcpy(check.text,CODE);
+
   char* shm = shm_read_process();
-  dmlog(":: Child B :: Mansagem",shm);
+  do{
+    sleep(1);
+    if(strcmp(shm,CODE)){
+      dlog("If check code child b");
+      // Shmem
+      shm = shm_read_process();
+      // Send to stack
+      strcpy(msg_send.text,shm);
+      send_msg(&msg_send,qid);
+      dmlog("SHM ",shm);
 
-  Msg msg_check;
-  msg_check.type = 0;
-  strcpy(msg_check.text,CODE);
-  shm_write_process(msg_check);
-
-  strcpy(msg_send.text,shm);
-  send_msg(&msg_send,qid);
+      shm_write_process(check);
+    }
+  }while(strcmp(msg_send.text,"EXIT"));
   remove_queue(qid);
 }

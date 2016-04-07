@@ -15,9 +15,12 @@ exec: compile
 	$(shell tmux send-keys -t 0 'clear' enter)
 	$(shell tmux send-keys -t 0 './progA $(FLAGS)' enter)
 
+	$(shell tmux send-keys -t 1 'sleep 1' enter)
 	$(shell tmux send-keys -t 1 'clear' enter)
 	$(shell tmux send-keys -t 1 './progB $(FLAGS)' enter)
 	$(shell tmux attach)
 
 clean:
 	rm prog*
+	ipcrm --all=msg
+	ipcrm --shmem-key=5678

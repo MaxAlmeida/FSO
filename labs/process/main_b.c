@@ -1,6 +1,8 @@
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<stdbool.h>
 
 #include<sys/msg.h>
 #include<sys/errno.h>
@@ -11,7 +13,15 @@
 #include "comunication.h"
 #include "process.h"
 
+#define DEBUG "--debug"
+#define TCP "--tcp"
+
+bool EN_TCP = false;
+
+void flags(int argc, char* argv[]);
+
 int main(int argc, char* argv[]){
+  flags(argc,argv);
   int qid = create_queue();
   int pid = fork();
 
@@ -23,11 +33,16 @@ int main(int argc, char* argv[]){
     printf("Failed to create process!\n",pid);
     exit(-1);
   } 
-  //key_t key = 5678;
-  //int mem_id = shm_get(key);
-  //char* shm = shm_attach(mem_id);
-  //printf(">>>> %d\n\n",mem_id);
-  // printf("Lido na memoria: %s\n",shm);
-
-
 }
+void flags(int argc, char* argv[]){
+  int i = 0;
+  if(argc > 1){
+    for(i=1;i<argc;i++){
+      if(!strcmp(DEBUG,argv[i]))
+        EN_LOG = true;
+      if(!strcmp(TCP,argv[i]))
+        EN_TCP = true;
+    }
+  }
+}
+
