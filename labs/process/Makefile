@@ -19,8 +19,5 @@ exec: compile
 	$(shell tmux send-keys -t 1 './progB $(FLAGS)' enter)
 	$(shell tmux attach)
 
-test:
-	@echo $(FLAGS)
-
 clean:
 	rm prog*
