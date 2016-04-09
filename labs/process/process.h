@@ -21,17 +21,21 @@ void server(int qid){
   Msg msg_send;
   do{
     read_msg(&msg_send,qid);
-    write(client, msg_send.text, strlen(msg_send.text));
+    write(client, msg_send.text,sizeof(msg_send.text));
   }while(strcmp(msg_send.text,"EXIT"));
+  close(client);
 }
 
 void client(int qid){
   int socket = init_client();
   Msg msg_rcv;
+  char msg[250];
   do{
-    sleep(1);
-    read(socket, &msg_rcv.text, strlen(msg_rcv.text));
+    //recv(socket, msg, strlen(msg),0);
+    read(socket, msg_rcv.text, sizeof(msg_rcv.text)); 
+    dmlog("Client socket rcv", msg);
     send_msg(&msg_rcv,qid);
+    sleep(1);
   }while(strcmp(msg_rcv.text,"EXIT"));
 }
 

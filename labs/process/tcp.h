@@ -43,6 +43,7 @@ struct sockaddr_in init_sockaddr(int port, char* ip){
 int init_server(){
   int socket = create_socket();
   socklen_t cli_len = sizeof(struct sockaddr_in);
+
   struct sockaddr_in client;
   struct sockaddr_in server = init_sockaddr(8200, "127.0.0.1");
 
@@ -50,7 +51,7 @@ int init_server(){
   printf("Waiting for connection...\n");
   listen(socket,3);
 
-  int new_cli = accept(socket, (struct sockaddr *)&client, (socklen_t*)&cli_len);
+  int new_cli = accept(socket, (struct sockaddr *)&client, &cli_len);
   if(new_cli < 0) elog("Failed to accept!");
   printf("Connection accepted!\n");
 
