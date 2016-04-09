@@ -18,7 +18,7 @@ typedef struct msg_buf{
 char* user_input(){
   char msg[250];
   printf("[you]> ");
-  scanf("%s",msg);
+  gets(msg);
   return msg;
 }
 
