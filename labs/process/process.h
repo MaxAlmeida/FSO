@@ -16,12 +16,23 @@ void parent_a(int qid){
   remove_queue(qid);
 }
 
-void server(){
-  init_server();
+void server(int qid){
+  int client = init_server();
+  Msg msg_send;
+  do{
+    read_msg(&msg_send,qid);
+    write(client, msg_send.text, strlen(msg_send.text));
+  }while(strcmp(msg_send.text,"EXIT"));
 }
 
-void client(){
-  init_client();
+void client(int qid){
+  int socket = init_client();
+  Msg msg_rcv;
+  do{
+    sleep(1);
+    read(socket, &msg_rcv.text, strlen(msg_rcv.text));
+    send_msg(&msg_rcv,qid);
+  }while(strcmp(msg_rcv.text,"EXIT"));
 }
 
 void shmem_sender(int qid){
@@ -55,7 +66,6 @@ void shmem_rcv(int qid){
   do{
     sleep(1);
     if(strcmp(shm,CODE)){
-      dlog("If check code child b");
       // Shmem
       shm = shm_read_process();
       // Send to stack
@@ -71,7 +81,7 @@ void shmem_rcv(int qid){
 
 void child_a(int qid){
   if(EN_TCP == true){
-    server();
+    server(qid);
   }else{
     shmem_sender(qid);
   }
@@ -90,7 +100,7 @@ void parent_b(int qid){
 
 void child_b(int qid){
   if(EN_TCP == true){
-    client();
+    client(qid);
   }else{
     shmem_rcv(qid);
   }
