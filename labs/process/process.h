@@ -16,12 +16,21 @@ void parent_a(int qid){
   remove_queue(qid);
 }
 
-void child_a(int qid){
+void server(){
+  init_server();
+}
+
+void client(){
+  init_client();
+}
+
+void shmem_sender(int qid){
   dlog(":: Child A EXEC ::");
   key_t key = KEY;
   Msg msg_rcv;
-  
+
   do{
+    //Shared memmory process
     char* check = shm_read_process();
     sleep(1);
     if(!strcmp(check,CODE)){
@@ -32,18 +41,7 @@ void child_a(int qid){
   }while(strcmp(msg_rcv.text,"EXIT"));
 }
 
-void parent_b(int qid){
-  dlog(":: Parent B EXEC ::");
-  int status;
-  Msg msg_rcv;
-  do{
-    read_msg(&msg_rcv,qid);
-    printf("[msg]> %s\n", msg_rcv.text);
-  }while(strcmp(msg_rcv.text,"EXIT"));
-  wait(&status);
-}
-
-void child_b(int qid){
+void shmem_rcv(int qid){
   dlog(":: Child B EXEC ::");
   key_t key = KEY;
   int status;
@@ -69,4 +67,31 @@ void child_b(int qid){
     }
   }while(strcmp(msg_send.text,"EXIT"));
   remove_queue(qid);
+}
+
+void child_a(int qid){
+  if(EN_TCP == true){
+    server();
+  }else{
+    shmem_sender(qid);
+  }
+}
+
+void parent_b(int qid){
+  dlog(":: Parent B EXEC ::");
+  int status;
+  Msg msg_rcv;
+  do{
+    read_msg(&msg_rcv,qid);
+    printf("[msg]> %s\n", msg_rcv.text);
+  }while(strcmp(msg_rcv.text,"EXIT"));
+  wait(&status);
+}
+
+void child_b(int qid){
+  if(EN_TCP == true){
+    client();
+  }else{
+    shmem_rcv(qid);
+  }
 }

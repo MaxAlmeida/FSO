@@ -10,13 +10,12 @@
 #include<sys/shm.h>
 
 #include "mlog.h"
+#include "tcp.h"
 #include "comunication.h"
 #include "process.h"
 
 #define DEBUG "--debug"
 #define TCP "--tcp"
-
-bool EN_TCP = false;
 
 void flags(int argc, char* argv[]);
 
