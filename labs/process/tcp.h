@@ -2,7 +2,7 @@
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<arpa/inet.h>
-
+#include"pthread.h"
 #define IP_A "10.0.0.30"
 #define IP_B "10.0.0.40"
 
@@ -64,4 +64,21 @@ int init_client(){
   struct sockaddr_in server = init_sockaddr(8200,"127.0.0.1");
   set_connection(socket, server);
   return socket;
+}
+
+void * receiveMessage(void * socket){
+  int sockfd, ret;
+  char teste[30];
+  sockfd = (int) socket;
+  for(;;){
+   int ret = read(sockfd, teste, sizeof(teste));
+    if(ret < 0){
+      printf("Error receiving data!\n");  
+    }
+    else{
+     printf(">>> Recebendo mensagem do client %s",teste);
+     //receive_message.type = 0;
+    // send_msg(&receive_message,qid);
+    }
+  }    
 }

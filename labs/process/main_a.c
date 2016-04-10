@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<stdbool.h>
-
+#include"pthread.h" 
 #include<sys/socket.h>
 #include<sys/msg.h>
 #include<sys/errno.h>

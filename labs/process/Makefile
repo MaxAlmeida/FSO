@@ -1,12 +1,12 @@
 FLAGS=
 
 all:
-	gcc -o progA main_a.c -w
-	gcc -o progB main_b.c -w
+	gcc -o progA main_a.c -w -pthread
+	gcc -o progB main_b.c -w -pthread
 
 compile:
-	gcc -o progA main_a.c -w
-	gcc -o progB main_b.c -w
+	gcc -o progA main_a.c -w -pthread
+	gcc -o progB main_b.c -w -pthread
 
 exec: compile
 	@echo $(FLAGS)

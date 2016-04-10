@@ -8,7 +8,7 @@
 #include<sys/errno.h>
 #include<sys/ipc.h>
 #include<sys/shm.h>
-
+#include"pthread.h"
 #include "mlog.h"
 #include "tcp.h"
 #include "comunication.h"

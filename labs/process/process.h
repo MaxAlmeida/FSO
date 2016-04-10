@@ -19,6 +19,8 @@ void parent_a(int qid){
 void server(int qid){
   int client = init_server();
   Msg msg_send;
+  pthread_t rThread;
+ int ret = pthread_create(&rThread, NULL, receiveMessage, (void *) client);
   do{
     read_msg(&msg_send,qid);
     write(client, msg_send.text,sizeof(msg_send.text));
