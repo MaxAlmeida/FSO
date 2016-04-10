@@ -1,33 +1,37 @@
 #define CODE "889299"
 #define KEY 5678
 
-void parent_a(int qid){
+void parent_a(int qid_send, int qid_receive){
   dlog(":: Parent A EXEC ::");
   int status;
   Msg msg_send;
+  pthread_t rThread;
 
+  int ret = pthread_create(&rThread, NULL, printMessage, (void *)qid_receive);
   // Loop to read input from user
   do{
+    
     msg_send.type = 0;
     strcpy(msg_send.text, user_input());
-    send_msg(&msg_send,qid);
+    send_msg(&msg_send,qid_send);
   } while(strcmp(msg_send.text,"EXIT"));
   wait(&status);
-  remove_queue(qid);
+  remove_queue(qid_send);
 }
-
-void server(int qid){
+/* Qid_send from queue messsages sended by father A */
+/* Qid_receive from child B by trhead receive Message */
+void server(int qid_send, int qid_receive){
   int client = init_server();
   InfoMsg *info;
   info = malloc(sizeof(*info));
   
-  info->qid = qid;
+  info->qid = qid_receive;
   info->client = client;
   Msg msg_send;
   pthread_t rThread;
- int ret = pthread_create(&rThread, NULL, receiveMessage, info);
+  int ret = pthread_create(&rThread, NULL, receiveMessage, info);
   do{
-    read_msg(&msg_send,qid);
+    read_msg(&msg_send,qid_send);
     write(client, msg_send.text,sizeof(msg_send.text));
   }while(strcmp(msg_send.text,"EXIT"));
   close(client);
@@ -90,11 +94,11 @@ void shmem_rcv(int qid){
   remove_queue(qid);
 }
 
-void child_a(int qid){
+void child_a(int qid_send, int qid_receive){
   if(EN_TCP == true){
-    server(qid);
+    server(qid_send, qid_receive);
   }else{
-    shmem_sender(qid);
+    shmem_sender(qid_send);
   }
 }
 

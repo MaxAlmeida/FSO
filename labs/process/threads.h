@@ -11,6 +11,19 @@ typedef struct info{
 
 } InfoMsg;
 
+void *printMessage(void *qid_queue){
+  int qid;
+  qid = (int) qid_queue;
+  
+  Msg receive_message;
+  for(;;){
+    read_msg(&receive_message,qid);
+    printf("<Other>: %s",receive_message.text);  
+
+  }
+
+}
+
 void *receiveMessage(void *socket){
   Msg receive_message;
   InfoMsg *params = socket;
@@ -23,12 +36,12 @@ void *receiveMessage(void *socket){
       printf("Error receiving data on thread!\n");
     }
     else{
-      printf(">>>Recebendo mensagem do client %s\n", receive_message.text);
-      printf(">>> qid %d \n\n", params->qid);
+     // printf(">>>Recebendo mensagem do client %s\n", receive_message.text);
+      //printf(">>> qid %d \n\n", params->qid);
       receive_message.type = 0;
-     // send_msg(&receive_message,params->qid);
+      send_msg(&receive_message,params->qid);
     }
 
   }while(strcmp(receive_message.text,"EXIT"));
-
+  close(sock_receive);
 }

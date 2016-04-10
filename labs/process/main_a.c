@@ -22,7 +22,8 @@ void flags(int argc, char* argv[]);
 
 int main(int argc, char* argv[]){
   flags(argc,argv);
-  int qid = create_queue();
+  int qid_send = create_queue();
+  int qid_receive = create_queue();
   int pid = fork();
   Msg msg_check;
   key_t key = KEY;
@@ -30,9 +31,9 @@ int main(int argc, char* argv[]){
   strcpy(msg_check.text, CODE);
   shm_write_process(msg_check);
   if(pid > 0){ // Parent
-    parent_a(qid);
+    parent_a(qid_send, qid_receive);
   }else if(pid == 0){ // Child
-    child_a(qid);
+    child_a(qid_send, qid_receive);
   } else if(pid < 0){ // Fail
     printf("Failed to create process!\n", pid);
     exit(-1);
