@@ -18,9 +18,14 @@ void parent_a(int qid){
 
 void server(int qid){
   int client = init_server();
+  InfoMsg *info;
+  info = malloc(sizeof(*info));
+  
+  info->qid = qid;
+  info->client = client;
   Msg msg_send;
   pthread_t rThread;
- int ret = pthread_create(&rThread, NULL, receiveMessage, (void *) client);
+ int ret = pthread_create(&rThread, NULL, receiveMessage, info);
   do{
     read_msg(&msg_send,qid);
     write(client, msg_send.text,sizeof(msg_send.text));
