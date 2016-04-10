@@ -12,6 +12,7 @@
 #include "mlog.h"
 #include "comunication.h"
 #include "tcp.h"
+#include "threads.h"
 #include "process.h"
 
 #define DEBUG "--debug"

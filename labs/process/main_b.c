@@ -10,8 +10,9 @@
 #include<sys/shm.h>
 #include"pthread.h"
 #include "mlog.h"
-#include "tcp.h"
 #include "comunication.h"
+#include "tcp.h"
+#include "threads.h"
 #include "process.h"
 
 #define DEBUG "--debug"

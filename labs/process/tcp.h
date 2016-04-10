@@ -7,10 +7,10 @@
 #define IP_B "10.0.0.40"
 
 /* Definition of the struct to get information the socket and queue */
-typedef struct info{
-  int qid;
-  int client;
-} InfoMsg;
+//typedef struct info{
+ // int qid;
+ // int client;
+//} InfoMsg;
 
 bool EN_TCP = false;
 
@@ -72,21 +72,4 @@ int init_client(){
   return socket;
 }
 
-void * receiveMessage(void *socket){
-  InfoMsg *params = socket;
-  int sockfd, ret;
-  char teste[30];
-  sockfd =  params->client;
-  for(;;){
-   int ret = read(sockfd, teste, sizeof(teste));
-    if(ret < 0){
-      printf("Error receiving data!\n");  
-    }
-    else{
-     printf(">>> Recebendo mensagem do client %s\n",teste);
-     printf(">>> qid %d \n\n",params->qid);
-     //receive_message.type = 0;
-    // send_msg(&receive_message,qid);
-    }
-  }    
-}
+
