@@ -37,15 +37,22 @@ void server(int qid_send, int qid_receive){
   close(client);
 }
 
-void client(int qid){
+void client(int qid_send, int qid_receive){
   int socket = init_client();
+  InfoMsg *info;
+  info = malloc(sizeof(*info));
+
+  info->qid = qid_send;
+  info->client = socket;
   Msg msg_rcv;
+  pthread_t rThread;
+  int ret = pthread_create(&rThread, NULL, sendMessage, info);
   char msg[250];
   do{
     //recv(socket, msg, strlen(msg),0);
     read(socket, msg_rcv.text, sizeof(msg_rcv.text)); 
     dmlog("Client socket rcv", msg);
-    send_msg(&msg_rcv,qid);
+    send_msg(&msg_rcv,qid_receive);
     sleep(1);
   }while(strcmp(msg_rcv.text,"EXIT"));
 }
@@ -102,21 +109,23 @@ void child_a(int qid_send, int qid_receive){
   }
 }
 
-void parent_b(int qid){
+void parent_b(int qid_send, int qid_receive){
   dlog(":: Parent B EXEC ::");
   int status;
+  pthread_t rThread;
   Msg msg_rcv;
+  int ret = pthread_create(&rThread, NULL, readMessage, (void *)qid_send);
   do{
-    read_msg(&msg_rcv,qid);
-    printf("[msg]> %s\n", msg_rcv.text);
+    read_msg(&msg_rcv,qid_receive);
+    printf("<Other:> %s\n", msg_rcv.text);
   }while(strcmp(msg_rcv.text,"EXIT"));
   wait(&status);
 }
 
-void child_b(int qid){
+void child_b(int qid_send, int qid_receive){
   if(EN_TCP == true){
-    client(qid);
+    client(qid_send, qid_receive);
   }else{
-    shmem_rcv(qid);
+    shmem_rcv(qid_receive);
   }
 }

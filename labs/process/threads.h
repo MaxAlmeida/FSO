@@ -24,6 +24,17 @@ void *printMessage(void *qid_queue){
 
 }
 
+void *readMessage(void *qid_queue){
+  int qid;
+  qid = (int) qid_queue;
+  
+  Msg send_message;
+  do{
+    strcpy(send_message.text,user_input());
+    send_msg(&send_message,qid);
+  }while(strcmp(send_message.text,"EXIT"));
+  
+}
 void *receiveMessage(void *socket){
   Msg receive_message;
   InfoMsg *params = socket;
@@ -44,4 +55,21 @@ void *receiveMessage(void *socket){
 
   }while(strcmp(receive_message.text,"EXIT"));
   close(sock_receive);
+}
+
+void *sendMessage(void *socket){
+  Msg send_message;
+  InfoMsg *params = socket;
+  int sock_send, status;
+  sock_send = params->client;
+  
+  do{
+    int status = write(sock_send, send_message.text, sizeof(send_message.text));
+    if(status < 0){
+      printf("Error receiving data on thread!\n");
+    }
+    send_message.type = 0;
+    read_msg(&send_message, params->qid);
+  }while(strcmp(send_message.text,"EXIT"));
+  close(sock_send);
 }

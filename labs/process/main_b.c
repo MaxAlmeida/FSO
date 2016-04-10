@@ -22,13 +22,14 @@ void flags(int argc, char* argv[]);
 
 int main(int argc, char* argv[]){
   flags(argc,argv);
-  int qid = create_queue();
+  int qid_receive = create_queue();
+  int qid_send = create_queue();
   int pid = fork();
 
   if(pid > 0){
-    parent_b(qid);
+    parent_b(qid_send, qid_receive);
   }else if(pid == 0){
-    child_b(qid);
+    child_b(qid_send, qid_receive);
   }else if(pid < 0){
     printf("Failed to create process!\n",pid);
     exit(-1);
