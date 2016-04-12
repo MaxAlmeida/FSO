@@ -1,0 +1,15 @@
+\chapter{Descrição de Parâmetros}
+Este capitulo descreve os parametros utilizados nas funções relativas à IPC
+\section{Fila de Mensagens}
+Para criação de fila de mensagens é utilizado o seguinte método:
+\begin{lstlisting}
+msgget(IPC_PRIVATE, MSG_PRM | IPC_CREAT | IPC_EXCL);
+\end{lstlisting}
+
+O método msgget() é reponsável pela criação de fila de mensagens caso elas não exista , caso existam ele irá conectar a fila de mensagem existente. Os parametros utilizados nesse caso serão descritos a seguir:
+
+\begin{itemize}
+	\item IPC\_PRIVATE - É um key type específico para criação de uma nova fila de mensagem;
+    \item MSG\_PRM - Definição da permissão da fila de mensagem, no código esse valor ficou definido como 600;
+	\item IPC\_CREATE e IPC\_EXCL - quando utilizadas em conjunto se a fila de mensagem já existir a função retornará EEXIST.  
+\end{itemize}

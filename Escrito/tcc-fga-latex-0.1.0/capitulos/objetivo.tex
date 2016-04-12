@@ -1,0 +1,14 @@
+\chapter{Objetivos}
+O trabalho tem como objetivo a comunicação entre processos independentes, usando assim mecanismos de filas de mensagens, sockets e memória compartilhada. No trabalho os processos comunicantes simularam um protocolo de rede que será composto por duas camadas, que são eles o host A e host B.  A comunicação será realizada entre o pai A com o filho A onde, haverá a criação de uma fila de mensagem e esta será enviada para o filho. Também tem conversação entre o filho A com o filho B usando memória compartilhada e por fim a  interlocução entre o filho B com o Pai B, onde o filho vai ler a mensagem que foi compartilhada e enviar para seu pai. Assim, será feito a comunicação entre os processos que foram criados.
+
+\section{Alternativas Implementadas}
+Todas as soluções abaixo foram completadas integralmente.
+
+\begin{itemize}
+	\item Comunicação simplex (unidirecional) entre A e B (conforme desenho);
+	\item Comunicação simplex (unidirecional) entre A e B substituindo a memória compartilhada por um socket (tcp ou udp);
+	\item Comunicação duplex (em dois sentidos) entre A e B residentes em hosts distintos.
+
+
+\end{itemize}
+
