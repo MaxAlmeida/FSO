@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2015/dev/Debian) (preloaded format=pdflatex 2016.1.14)  12 APR 2016 01:29
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2015/dev/Debian) (preloaded format=pdflatex 2016.1.14)  12 APR 2016 12:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1040,10 +1040,10 @@ LaTeX Font Info:    Try loading font information for T1+lmss on input line 12.
 File: t1lmss.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 Package epstopdf Info: Source file: <figuras/capa.eps>
-(epstopdf)                    date: 2013-04-15 09:15:43
+(epstopdf)                    date: 2016-04-12 11:49:54
 (epstopdf)                    size: 649636 bytes
 (epstopdf)             Output file: <figuras/capa-eps-converted-to.pdf>
-(epstopdf)                    date: 2016-04-11 23:59:28
+(epstopdf)                    date: 2016-04-12 11:49:54
 (epstopdf)                    size: 105943 bytes
 (epstopdf)             Command: <repstopdf --outfile=figuras/capa-eps-converted
 -to.pdf figuras/capa.eps>
@@ -1127,41 +1127,46 @@ Overfull \hbox (27.66425pt too wide) in paragraph at lines 22--23
 am-in-c-using-sockets-
  []
 
-[5]) (./capitulos/descricao.tex [6])
+[5]) (./capitulos/descricao.tex [6] [7] [8]
+Overfull \hbox (17.34714pt too wide) in paragraph at lines 121--122
+[][][][][][][][][][][][][][][][][][][][] 
+ []
+
+) (./capitulos/consideracoes.tex [9] [10
+
+])
 No file tcc.ind.
 
 AED: lastpage setting LastPage
-[7
-
-]
+[11]
 \tf@toc=\write5
 \openout5 = `tcc.toc'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 48.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 48.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 49.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 49.
  (./tcc.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 48.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 48.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 48.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 49.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 49.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 49.
  ) 
 Here is how much of TeX's memory you used:
- 13635 strings out of 494368
- 195794 string characters out of 6163115
- 315456 words of memory out of 5000000
- 16639 multiletter control sequences out of 15000+600000
+ 13667 strings out of 494368
+ 196266 string characters out of 6163115
+ 318465 words of memory out of 5000000
+ 16644 multiletter control sequences out of 15000+600000
  42016 words of font info for 37 fonts, out of 8000000 for 9000
  374 hyphenation exceptions out of 8191
- 41i,13n,38p,1066b,974s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,13n,38p,1066b,986s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
 ips/lm/lm-mathsy.enc}</usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/s
 hare/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/fonts/type1/public
 /lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/lm/lmss17.pfb></usr/share/te
 xmf/fonts/type1/public/lm/lmssbx10.pfb></usr/share/texmf/fonts/type1/public/lm/
 lmsy10.pfb>
-Output written on tcc.pdf (9 pages, 242323 bytes).
+Output written on tcc.pdf (13 pages, 254060 bytes).
 PDF statistics:
- 128 PDF objects out of 1000 (max. 8388607)
- 102 compressed objects within 2 object streams
- 19 named destinations out of 1000 (max. 500000)
- 90 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 179 PDF objects out of 1000 (max. 8388607)
+ 149 compressed objects within 2 object streams
+ 43 named destinations out of 1000 (max. 500000)
+ 106 words of extra memory for PDF output out of 10000 (max. 10000000)
 
