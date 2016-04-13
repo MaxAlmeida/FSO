@@ -1,20 +1,23 @@
 
 extern int errno;
 /* Definition of the Shared Memory attr */
-#define SHM_PRM 0600
+#define SHM_PRM 0666
 #define SHM_LEN  250
+#define KEY     5678
 
 /* Definition of the Message Stack attr */
-#define MSG_PRM 0600
-#define TEXT_LEN 250
+#define MSG_PRM  0600
+#define TEXT_LEN  250
 
-/* Definition of the struct of the message */
+/* Definition of the struct of the message
+   It's used in the Queue IPC */
 typedef struct msg_buf{
   int type;
   char text[TEXT_LEN];
 } Msg;
 
-/* Return a struct with the msg from user */
+/* Read the message form the user
+    @return msg, the input message from user*/
 char* user_input(){
   char msg[250];
   printf("[you]> ");
@@ -25,6 +28,9 @@ char* user_input(){
 /********************************
     Stack Messages functions
 ********************************/
+
+/* Creates a new queue of message
+    @return qid, the ID of the queue */
 int create_queue(){
   int qid = msgget(IPC_PRIVATE, MSG_PRM | IPC_CREAT | IPC_EXCL);
   if(qid < 0){
@@ -36,6 +42,9 @@ int create_queue(){
   return qid;
 }
 
+/* Enqueue the message
+    @param msg, structure with msg and type of the msg
+    @param qid, the ID of the queue to send */
 void send_msg(Msg* msg, int qid){
   int status = msgsnd(qid, msg, sizeof(msg->text), 0);
   if(status < 0){
@@ -46,6 +55,9 @@ void send_msg(Msg* msg, int qid){
   }
 }
 
+/* Dequeue the message
+    @param *msg, the struct to write the message from queue
+    @param qid, the ID of the queue to recieve */
 int read_msg(Msg* msg, int qid){
   int status = msgrcv(qid, msg, sizeof(msg->text),0,0);
   if(status < 0){
@@ -55,6 +67,8 @@ int read_msg(Msg* msg, int qid){
   return status;
 }
 
+/* Remove the queue messge
+    @param qid, the ID of the queue to remove */
 void remove_queue(int qid){
   int status = msgctl(qid, IPC_RMID, NULL);
   if(status < 0){
@@ -66,8 +80,11 @@ void remove_queue(int qid){
 /********************************
     Shared Memory functions
 ********************************/
-int shm_create(key_t key){
-  int shmid = shmget(key, SHM_LEN, IPC_CREAT | 0666);
+
+/* Creates the shared memory
+    @return shmid, the ID of the shared memory*/
+int shm_create(){
+  int shmid = shmget(KEY, SHM_LEN, IPC_CREAT | SHM_PRM);
   if(shmid < 0){
     elog("Failed to create share memory!");
     mlog(strerror(errno));
@@ -77,46 +94,44 @@ int shm_create(key_t key){
   return shmid;
 }
 
-int shm_get(key_t key){
-  int shmid = shmget(key, SHM_LEN, 0666);
+/* Return the ID of the shared memory
+    @return shmid, the ID of shared memory*/
+int shm_get(){
+  int shmid = shmget(KEY, SHM_LEN, SHM_PRM);
   if(shmid < 0){
-    mlog("No message on shared memory!");
+    dlog("No message on shared memory!");
+  }else{
   }
   return shmid; 
 }
 
+/* Gets the message from a memory attach
+    @param shmid, the ID of the shared memory
+    @return shm, the */
 char* shm_attach(int shmid){
   char* shm = shmat(shmid, NULL, 0);
   if(shm == (char *) -1){
     elog("Failed to attach memory!");
     mlog(strerror(errno));
+  }else{
+    dlog("Memory attached!");
   }
   return shm;
 }
 
-void shm_send(Msg msg, char* shm){
-  strcpy(shm, msg.text);
-}
-
+/* Write the messenge on shered memory
+    @param msg_send, the struct of the message to send */
 void shm_write_process(Msg msg_send){
-  key_t key = 5678;
-  int shmid = shm_get(key);
+  int shmid = shm_get();
   char* shm = shm_attach(shmid);
   msg_send.type = 0;
-  shm_send(msg_send,shm);
+  strcpy(shm, msg_send.text);
 }
 
+/* Read the message from the shared memory
+    @return shm, the messenge readed */
 char* shm_read_process(){
-  key_t key = 5678;
-  int shmid = shm_get(key);
-  char* shm = shm_attach(shmid); 
- return shm;
-}
-
-void clear_memmory(char* shm, int shmid){
-  if (shmdt(shm) == -1) {
-        dlog("Don't detach");
-        exit(1);
-    }
-  shmctl(shmid, IPC_RMID, NULL); 
+  int shmid = shm_get();
+  char* shm = shm_attach(shmid);
+  return shm;
 }

@@ -1,5 +1,4 @@
 #define CODE "889299"
-#define KEY 5678
 
 void parent_a(int qid_send, int qid_receive){
   dlog(":: Parent A EXEC ::");
@@ -22,6 +21,7 @@ void parent_a(int qid_send, int qid_receive){
   wait(&status);
   remove_queue(qid_send);
 }
+
 /* Qid_send from queue messsages sended by father A */
 /* Qid_receive from child B by trhead receive Message */
 void server(int qid_send, int qid_receive){
@@ -68,7 +68,6 @@ void client(int qid_send, int qid_receive){
 
 void shmem_sender(int qid){
   dlog(":: Child A EXEC ::");
-  key_t key = KEY;
   Msg msg_rcv;
 
   do{
@@ -85,7 +84,6 @@ void shmem_sender(int qid){
 
 void shmem_rcv(int qid){
   dlog(":: Child B EXEC ::");
-  key_t key = KEY;
   int status;
   Msg msg_send;
   Msg check;

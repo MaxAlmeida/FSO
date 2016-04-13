@@ -26,8 +26,7 @@ int main(int argc, char* argv[]){
   int qid_receive = create_queue();
   int pid = fork();
   Msg msg_check;
-  key_t key = KEY;
-  int shmid = shm_create(key);
+  int shmid = shm_create();
   strcpy(msg_check.text, CODE);
   shm_write_process(msg_check);
   if(pid > 0){ // Parent
