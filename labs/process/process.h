@@ -7,6 +7,7 @@ void parent_a(int qid_send, int qid_receive){
   Msg msg_send;
   pthread_t rThread;
 
+    char *temp;
   int ret = pthread_create(&rThread, NULL, printMessage, (void *)qid_receive);
   // Loop to read input from user
   do{
@@ -14,7 +15,9 @@ void parent_a(int qid_send, int qid_receive){
     msg_send.type = 0;
     strcpy(msg_send.text, user_input());
     send_msg(&msg_send,qid_send);
-  } while(strcmp(msg_send.text,"EXIT"));
+    strcpy(temp,msg_send.text);
+    temp[strcspn(temp, "\n")] = '\0';			
+  } while(strcmp(temp,"EXIT"));
   wait(&status);
   remove_queue(qid_send);
 }
@@ -24,16 +27,19 @@ void server(int qid_send, int qid_receive){
   int client = init_server();
   InfoMsg *info;
   info = malloc(sizeof(*info));
-  
+  char* temp; 
   info->qid = qid_receive;
   info->client = client;
   Msg msg_send;
   pthread_t rThread;
   int ret = pthread_create(&rThread, NULL, receiveMessage, info);
   do{
+   
     read_msg(&msg_send,qid_send);
     write(client, msg_send.text,sizeof(msg_send.text));
-  }while(strcmp(msg_send.text,"EXIT"));
+    strcpy(temp,msg_send.text);
+    temp[strcspn(temp, "\n")] = '\0';			
+  }while(strcmp(temp,"EXIT"));
   close(client);
 }
 
@@ -41,7 +47,7 @@ void client(int qid_send, int qid_receive){
   int socket = init_client();
   InfoMsg *info;
   info = malloc(sizeof(*info));
-
+  char *temp;
   info->qid = qid_send;
   info->client = socket;
   Msg msg_rcv;
@@ -54,7 +60,9 @@ void client(int qid_send, int qid_receive){
     dmlog("Client socket rcv", msg);
     send_msg(&msg_rcv,qid_receive);
     sleep(1);
-  }while(strcmp(msg_rcv.text,"EXIT"));
+    strcpy(temp,msg_rcv.text);
+    temp[strcspn(temp, "\n")] = '\0';			
+  }while(strcmp(temp,"EXIT"));
 }
 
 void shmem_sender(int qid){
@@ -111,14 +119,18 @@ void child_a(int qid_send, int qid_receive){
 
 void parent_b(int qid_send, int qid_receive){
   dlog(":: Parent B EXEC ::");
+  char* temp;
   int status;
   pthread_t rThread;
   Msg msg_rcv;
   int ret = pthread_create(&rThread, NULL, readMessage, (void *)qid_send);
   do{
     read_msg(&msg_rcv,qid_receive);
+    
+    strcpy(temp,msg_rcv.text);
+    temp[strcspn(temp, "\n")] = '\0';			
     printf("<Other:> %s\n", msg_rcv.text);
-  }while(strcmp(msg_rcv.text,"EXIT"));
+  }while(strcmp(temp,"EXIT"));
   wait(&status);
 }
 

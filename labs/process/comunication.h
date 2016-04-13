@@ -19,7 +19,6 @@ char* user_input(){
   char msg[250];
   printf("[you]> ");
   fgets(msg,sizeof(msg),stdin);
-  msg[strcspn(msg,"\n")] = '\0';
   return msg;
 }
 
