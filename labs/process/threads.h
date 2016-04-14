@@ -14,13 +14,14 @@ typedef struct info{
 void *printMessage(void *qid_queue){
   int qid;
   qid = (int) qid_queue;
-  
+  char temp[250];
   Msg receive_message;
-  for(;;){
+  do{
     read_msg(&receive_message,qid);
-    printf("<Other>: %s",receive_message.text);  
-
-  }
+    printf("<Other>: %s",receive_message.text);
+    strcpy(temp,receive_message.text);  
+    temp[strcspn(temp,"\n")] = '\0';
+  }while(strcmp(temp,"EXIT"));
 
 }
 

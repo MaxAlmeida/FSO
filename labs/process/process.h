@@ -7,7 +7,7 @@ void parent_a(int qid_send, int qid_receive){
   Msg msg_send;
   pthread_t rThread;
 
-    char *temp;
+    char temp[250];
   int ret = pthread_create(&rThread, NULL, printMessage, (void *)qid_receive);
   // Loop to read input from user
   do{
@@ -16,7 +16,8 @@ void parent_a(int qid_send, int qid_receive){
     strcpy(msg_send.text, user_input());
     send_msg(&msg_send,qid_send);
     strcpy(temp,msg_send.text);
-    temp[strcspn(temp, "\n")] = '\0';			
+    temp[strcspn(temp, "\n")] = '\0';
+   // printf("APaguei a quebra de linha\n\n");			
   } while(strcmp(temp,"EXIT"));
   wait(&status);
   remove_queue(qid_send);
@@ -27,7 +28,7 @@ void server(int qid_send, int qid_receive){
   int client = init_server();
   InfoMsg *info;
   info = malloc(sizeof(*info));
-  char* temp; 
+  char temp[250]; 
   info->qid = qid_receive;
   info->client = client;
   Msg msg_send;
@@ -47,7 +48,7 @@ void client(int qid_send, int qid_receive){
   int socket = init_client();
   InfoMsg *info;
   info = malloc(sizeof(*info));
-  char *temp;
+  char temp[250];
   info->qid = qid_send;
   info->client = socket;
   Msg msg_rcv;
@@ -119,7 +120,7 @@ void child_a(int qid_send, int qid_receive){
 
 void parent_b(int qid_send, int qid_receive){
   dlog(":: Parent B EXEC ::");
-  char* temp;
+  char temp[250];
   int status;
   pthread_t rThread;
   Msg msg_rcv;
