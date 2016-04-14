@@ -127,10 +127,9 @@ void parent_b(int qid_send, int qid_receive){
   int ret = pthread_create(&rThread, NULL, readMessage, (void *)qid_send);
   do{
     read_msg(&msg_rcv,qid_receive);
-    
     strcpy(temp,msg_rcv.text);
     temp[strcspn(temp, "\n")] = '\0';			
-    printf("<Other:> %s\n", msg_rcv.text);
+    printf("<Other:> %s", msg_rcv.text);
   }while(strcmp(temp,"EXIT"));
   wait(&status);
 }

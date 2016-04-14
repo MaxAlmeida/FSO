@@ -18,7 +18,7 @@ void *printMessage(void *qid_queue){
   Msg receive_message;
   do{
     read_msg(&receive_message,qid);
-    printf("<Other>: %s",receive_message.text);
+    printf("<Other>: %s\n",receive_message.text);
     strcpy(temp,receive_message.text);  
     temp[strcspn(temp,"\n")] = '\0';
   }while(strcmp(temp,"EXIT"));
@@ -28,11 +28,12 @@ void *printMessage(void *qid_queue){
 void *readMessage(void *qid_queue){
   int qid;
   qid = (int) qid_queue;
-  
+  char temp[250];
   Msg send_message;
   do{
     strcpy(send_message.text,user_input());
     send_msg(&send_message,qid);
+    temp[strcspn(temp,"\n")] = '\0';
   }while(strcmp(send_message.text,"EXIT"));
   
 }
