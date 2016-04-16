@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <stdbool.h>
+
 bool EN_LOG=false;
 
 void dlog(char* msg){

@@ -3,16 +3,9 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 #include"pthread.h"
-#define IP_A "10.0.0.30"
-#define IP_B "10.0.0.40"
 
-/* Definition of the struct to get information the socket and queue */
-//typedef struct info{
- // int qid;
- // int client;
-//} InfoMsg;
-
-bool EN_TCP = false;
+#define IP "127.0.0.1"
+#define PORT 8502
 
 /* Creating a Socket */
 int create_socket(){
@@ -51,15 +44,15 @@ int init_server(){
   socklen_t cli_len = sizeof(struct sockaddr_in);
 
   struct sockaddr_in client;
-  struct sockaddr_in server = init_sockaddr(8200, "127.0.0.1");
+  struct sockaddr_in server = init_sockaddr(PORT, IP);
 
   bind_port(socket, server);
-  printf("Waiting for connection...\n");
+  printf("\nWaiting for connection...\n");
   listen(socket,3);
 
   int new_cli = accept(socket, (struct sockaddr *)&client, &cli_len);
   if(new_cli < 0) elog("Failed to accept!");
-  printf("Connection accepted!\n");
+  printf("\nConnection accepted!\n");
 
   return new_cli;
 }
@@ -67,9 +60,8 @@ int init_server(){
 /* Used to init a client side into the program */
 int init_client(){
   int socket = create_socket();
-  struct sockaddr_in server = init_sockaddr(8200,"127.0.0.1");
+  struct sockaddr_in server = init_sockaddr(PORT, IP);
   set_connection(socket, server);
   return socket;
 }
-
 

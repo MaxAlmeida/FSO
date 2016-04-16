@@ -1,76 +1,95 @@
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include"pthread.h" 
 
-/*Definition of the struct to get information the socket and queue */
-typedef struct info{
-  int qid;
-  int client;
+/* Dependecies */
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include "pthread.h" 
 
-} InfoMsg;
+/* Definition of the struct with the socket and queue */
+typedef struct qid{
+  int snd;
+  int rcv;
+} qIDs;
 
-void *printMessage(void *qid_queue){
-  int qid;
-  qid = (int) qid_queue;
-  char temp[250];
-  Msg receive_message;
+/* To open thread in client side */
+void *client(void *qids){
+  dlog(":: CLIENT ::");
+  Msg msg;
+  qIDs *qid = qids;
+  char tmp[TEXT_LEN];
+  int client = init_client();
   do{
-    read_msg(&receive_message,qid);
-    printf("<Other>: %s",receive_message.text);
-    strcpy(temp,receive_message.text);  
-    temp[strcspn(temp,"\n")] = '\0';
-  }while(strcmp(temp,"EXIT"));
-
+    read_msg(&msg,qid->snd);
+    write(client, msg.text, sizeof(msg.text));
+    strcpy(tmp,msg.text);
+  }while(strcmp(tmp,"EXIT"));
 }
 
-void *readMessage(void *qid_queue){
-  int qid;
-  qid = (int) qid_queue;
-  
-  Msg send_message;
+/* To open thread in server side */
+void *server(void *qids){
+  dlog(":: SERVER ::");
+  Msg msg;
+  qIDs *qid = qids;
+  char tmp[TEXT_LEN];
+  int socket = init_server();
   do{
-    strcpy(send_message.text,user_input());
-    send_msg(&send_message,qid);
-  }while(strcmp(send_message.text,"EXIT"));
-  
+    read(socket, msg.text, sizeof(msg.text));
+    send_msg(&msg,qid->rcv);
+    strcpy(tmp,msg.text);
+  }while(strcmp(tmp,"EXIT"));
+  close(socket);
 }
-void *receiveMessage(void *socket){
-  Msg receive_message;
-  InfoMsg *params = socket;
-  int sock_receive, status;
-  sock_receive = params->client;
 
+/* To recieve the message from child */
+void *dequeue_msg(void *qid_queue){
+  int qid = (int) qid_queue;
+  char tmp[TEXT_LEN];
+  Msg to_rcv;
   do{
-    int status = read(sock_receive, receive_message.text, sizeof(receive_message.text));
-    if(status < 0){
-      printf("Error receiving data on thread!\n");
+    read_msg(&to_rcv,qid);
+    printf("\n\r[Other]> %s",to_rcv.text);
+    strcpy(tmp,to_rcv.text);  
+  }while(strcmp(tmp,"EXIT"));
+}
+
+/* To send the message to child */
+void *enqueue_msg(void *qid_queue){
+  int qid = (int)qid_queue;
+  char tmp[TEXT_LEN];
+  Msg to_snd;
+  do{
+    strcpy(to_snd.text,user_input());
+    send_msg(&to_snd,qid);
+    strcpy(tmp,to_snd.text);  
+  }while(strcmp(tmp,"EXIT"));
+}
+
+/* The task for send message though SHM */
+void *shm_sender(int qid){
+  Msg to_send;
+  char* checker = shm_read_process();
+  do{
+    if(!strcmp(checker,CODE)){
+      read_msg(&to_send,qid);
+      shm_write_process(to_send);
+      dmlog("SHM has sended message!",to_send.text);
     }
-    else{
-     // printf(">>>Recebendo mensagem do client %s\n", receive_message.text);
-      //printf(">>> qid %d \n\n", params->qid);
-      receive_message.type = 0;
-      send_msg(&receive_message,params->qid);
-    }
-
-  }while(strcmp(receive_message.text,"EXIT"));
-  close(sock_receive);
+  }while(strcmp(to_send.text,"EXIT"));
 }
 
-void *sendMessage(void *socket){
-  Msg send_message;
-  InfoMsg *params = socket;
-  int sock_send, status;
-  sock_send = params->client;
-  
+/* The task for recieve message though SHM */
+void *shm_reciever(int qid){
+  Msg to_rcv;
+  char* shm = shm_read_process();
   do{
-    int status = write(sock_send, send_message.text, sizeof(send_message.text));
-    if(status < 0){
-      printf("Error receiving data on thread!\n");
+    sleep(1);
+    if(strcmp(shm,CODE)){
+      strcpy(to_rcv.text,shm);
+      send_msg(&to_rcv,qid);
+      dmlog("SHM has recieve message! ",to_rcv.text);
+      set_checker();
     }
-    send_message.type = 0;
-    read_msg(&send_message, params->qid);
-  }while(strcmp(send_message.text,"EXIT"));
-  close(sock_send);
+  }while(strcmp(to_rcv.text,"EXIT"));
 }
+
