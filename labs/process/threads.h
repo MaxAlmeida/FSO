@@ -20,6 +20,11 @@ void *client(void *qids){
   char tmp[TEXT_LEN];
   int client = init_client();
   do{
+    // Recieving
+    if(select_rcv(client)){
+      read(socket, msg.text, sizeof(msg.text));
+      send_msg(&msg,qid->rcv);}
+    // Sending
     read_msg(&msg,qid->snd);
     write(client, msg.text, sizeof(msg.text));
     strcpy(tmp,msg.text);
@@ -34,8 +39,13 @@ void *server(void *qids){
   char tmp[TEXT_LEN];
   int socket = init_server();
   do{
-    read(socket, msg.text, sizeof(msg.text));
-    send_msg(&msg,qid->rcv);
+    // Recieving
+    if(select_rcv(client)){
+      read(socket, msg.text, sizeof(msg.text));
+      send_msg(&msg,qid->rcv);}
+    // Sending
+    read_msg(&msg,qid->snd);
+    write(client, msg.text, sizeof(msg.text));
     strcpy(tmp,msg.text);
   }while(strcmp(tmp,"EXIT"));
   close(socket);

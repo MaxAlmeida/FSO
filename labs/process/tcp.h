@@ -1,11 +1,15 @@
-#include<stdio.h>
-#include<sys/types.h>
-#include<sys/socket.h>
-#include<arpa/inet.h>
-#include"pthread.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include "pthread.h"
 
 #define IP "127.0.0.1"
-#define PORT 8502
+#define PORT 8505
 
 /* Creating a Socket */
 int create_socket(){
@@ -63,5 +67,21 @@ int init_client(){
   struct sockaddr_in server = init_sockaddr(PORT, IP);
   set_connection(socket, server);
   return socket;
+}
+
+/* System Call select */
+bool select_rcv(int socket){
+  bool result = false;
+  fd_set readset;
+  FD_ZERO(&readset);
+  FD_SET(socket, &readset);
+  int sc = select(socket + 1, &readset, NULL, NULL, NULL);
+
+  if(sc > 0){
+    if(FD_ISSET(socket, &readset)) result = true;
+  }else if(sc < 0){
+    elog("Error on select");
+  }
+  return result;
 }
 
