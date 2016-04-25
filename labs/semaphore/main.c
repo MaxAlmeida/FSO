@@ -1,4 +1,4 @@
-/**
+/*
   Requisitos
 
   [] Senadores não podem entrar na sala simultaneamente
@@ -8,8 +8,8 @@
   [] Vereadores e depultados podem entrar juntos
 
   [] Utilizar memória compartilhada e semáforo
-  [] Informar o numero de senadores, depultados e vereadores (opção por flag para rnd)
-  [] Cria processos para cada parlamentar (senador, deputado e vereador)
+  [X] Numero de senadores, depultados e vereadores rand
+  [X] Cria processos para cada parlamentar (senador, deputado e vereador)
   [] Antes de entrar na sala deve meditar por 0~1000
   [] A votação deve ser simulada com 'sleep'
   [] Pai aguarda todos os processos filhos terminarem
@@ -18,59 +18,81 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <semaphore.h>
 
 #define SENADOR   1
 #define DEPUTADO  2
 #define VEREADOR  3
 
-#define YES   1
-#define NO    0
 
-/* Structure */
-typedef struct voter{
-  int voter_id;
+void meditate(){
+  srand(time(NULL));
+  int time = rand() % 1000;
+  usleep(time);
+}
+
+void enter_room(){
+}
+
+void vote(){
+  usleep(50);
+}
+
+void voting_process(){
+//  sem_wait(); // Enter Critical Section
+  meditate();
+  enter_room();
+  vote();
+//  sem_post(); // Exit Critical Section
+}
+
+typedef struct parlamentar{
   int type;
-  int wating_time;
-} Voter;
-
-typedef struct imp{
-  int yes;
-  int no;
-}Imp;
-
-/* Definitions of the mathods */
-void voting(Voter voters[]);
-void enter_room(Voter* voter);
-void vote(int v);
-Voter new_voter(int id, int type, int wating);
-
-/* Definitions of semaphores */
-
+}Parlamentar;
 
 int main(){
+  srand(time(NULL));
+  int senador   = rand() % 50;
+  int deputado  = rand() % 50;
+  int vereador  = rand() % 50;
+  int i; // counter
+  int status; // waiting status
+
+  // Creating the 'Senadores'
+  for(i=0;i<senador;i++){
+    pid = fork();
+    if(pid < 0){printf("Failed to fork!\n");}
+    else if(pid==0){ // Child
+      // Starting voting
+      Parlamentar new_parlamentar;
+      new_parlamentar.type = SENADOR;
+    }
+  }
+
+  // Creating the 'Deputados'
+  for(i=0;i<deputado;i++){
+    pid = fork();
+    if(pid < 0){printf("Failed to fork!\n");}
+    else if(pid==0){ // Child
+      // Starting voting
+      Parlamentar new_parlamentar;
+      new_parlamentar.type = DEPUTADO;
+    }
+  }
+
+  // Creating the 'Vereadores'
+  for(i=0;i<vereador;i++){
+    pid = fork();
+    if(pid < 0){printf("Failed to fork!\n");}
+    else if(pid==0){ // Child
+      // Starting voting
+      Parlamentar new_parlamentar;
+      new_parlamentar.type = VEREADOR;
+    }
+  }
+
+  wait(&status);
   return 0;
 }
-
-void voting(Voter voters[]){
-  enter_room();
-  
-}
-
-void enter_room(Voter* voter){
-}
-
-void vote(Imp* imp, int v){
-  if(v == YES)
-    imp->yes++;
-  else
-    imp->no++;
-}
-
-Voter new_voter(int id, int type, int wating){
-  Voter voter;
-  voter.voter_id = id;
-  voter.type = type;
-  voter.wating_time = wating;
-  return voter;
-}
-
