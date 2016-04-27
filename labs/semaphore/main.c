@@ -48,6 +48,12 @@ void voting_process(){
 //  sem_post(); // Exit Critical Section
 }
 
+typedef struct sems{
+  sem_t senador;
+  sem_t vereador;
+  sem_t deputado;
+}Sems;
+
 typedef struct parlamentar{
   int type;
 }Parlamentar;
@@ -59,7 +65,11 @@ int main(){
   int vereador  = rand() % 50;
   int i; // counter
   int status; // waiting status
-
+  key_t key = KEY;
+  int shm_id;
+  shm_id = shm_create (key);
+  sems attr;
+  attr = (sems)    
   // Creating the 'Senadores'
   for(i=0;i<senador;i++){
     pid = fork();
