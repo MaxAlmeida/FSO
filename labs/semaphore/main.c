@@ -22,10 +22,45 @@
 #include <time.h>
 #include <semaphore.h>
 
-#define SENADOR   1
-#define DEPUTADO  2
-#define VEREADOR  3
+#define SENADOR   0
+#define DEPUTADO  1
+#define VEREADOR  2
+int N; //numero de parlamentares
+int state[N];
+Parlamentar parlamentares[N];
+sem_t mutex;
+int status[3];
+void parlamentar(int i){
+  srand(time(NULL));
+  usleep(rand() % 1000);
+  enter_room();
+  vote();
+  quit_room();
+}
+/*
+void take_fork(int i){
+  down(&mutex);  // area crítica
+  state[i] == HUNGRY; // READY
+  test(i);
+  up(&mutex);  // sai da area critica
+  down(&s[i]);  // block entrada da sala
+}
 
+void put_fork(int i){
+  down(&mutex);
+  state[i] = THINKING;
+  test(LEFT);
+  test(RIGHT);
+  up(&mutex);
+}
+
+void test(int i){ // numero do filosofo
+  if(status[i]==HUNGER && status[LEFT]!= EATING && status[RIGHT]!= EATING){
+    status[i] = EATING;// VOTANDO
+    up(&s[i]);
+  }
+}
+*/
 
 void meditate(){
   srand(time(NULL));
@@ -33,19 +68,23 @@ void meditate(){
   usleep(time);
 }
 
-void enter_room(){
+void enter_room(int i){
+  sem_wait(&mutex);
+  state[i] = READY
+  test(i);
+  sem_post(&mutex);
+  sem_wait(&parlamentares[i]);
+}
+
+void quit_room(int i){
+  sem_wait(&mutex);
+  state[i] = DONE;
+  test(i);
+
 }
 
 void vote(){
   usleep(50);
-}
-
-void voting_process(){
-//  sem_wait(); // Enter Critical Section
-  meditate();
-  enter_room();
-  vote();
-//  sem_post(); // Exit Critical Section
 }
 
 typedef struct sems{
@@ -65,11 +104,15 @@ int main(){
   int vereador  = rand() % 50;
   int i; // counter
   int status; // waiting status
+
+  
   key_t key = KEY;
   int shm_id;
   shm_id = shm_create (key);
-  sems attr;
-  attr = (sems)    
+  sems *attr;
+  attr = (sems) shmat (shm_id, NULL, 0);
+  sem_init(attr->senador, 1, 1);	   
+
   // Creating the 'Senadores'
   for(i=0;i<senador;i++){
     pid = fork();
