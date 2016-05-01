@@ -31,30 +31,62 @@ typedef struct sems{
 }Sems;
 
 #include "comunication.h"
-void meditate(int number){
-  printf("Eu processo de numero %d pensando aqui na morte da bezerra\n",number);
-
-  srand(time(NULL));
-  int time = rand() % 1000;
-  sleep(1);
+void meditate(int number, int type_parlamentar){
+  if(type_parlamentar == SENADOR){
+    printf("Eu Senador de número %d pensando aqui na morte da bezerra\n",number);
+    srand(time(NULL));
+    int time = rand() % 1000;
+    sleep(1);
+   }
+  else if(type_parlamentar == DEPUTADO){
+    printf("Eu deputado de número %d pensando aqui na morte da bezerra\n",number);
+    srand(time(NULL));
+    int time = rand() % 1000;
+    sleep(1);
+  }   
 }
-void enter_room(int number){
-  printf("Processo de numero %d entra na sala\n",number);
+void enter_room(int number, int type_parlamentar){
+  if(type_parlamentar == SENADOR){
+    printf("Senador de numero %d entra na sala\n",number);
+ }
+
+  else if(type_parlamentar == DEPUTADO){
+    printf("Deputado de numero %d entra na sala\n",number); 
+  }
 }
 
-void vote(int number){
-  printf("Processo de numero %d vota neste momento\n",number);
-  sleep(1);
+
+void vote(int number, int type_parlamentar){
+  if(type_parlamentar == SENADOR){
+    printf("Senador de numero %d vota neste momento\n",number);
+    sleep(5);
+   }
+  else if(type_parlamentar == DEPUTADO){
+    printf("Deputado de número %d vota neste momento\n",number);
+    sleep(5);
+  }
 }
 
-void voting_process(int number, int shmid){ 
-  Sems* semaphore = shm_read_process(shmid);
-  meditate(number);
-  sem_wait(&semaphore->senador); // Enter Critical Section
-  semaphore->senador_only = 1; //only senator in room
-  enter_room(number);
-  vote(number);
-  sem_post(&semaphore->senador); // Exit Critical Section
+void voting_process(int number, int shmid, int type_parlamentar){ 
+  if(type_parlamentar == SENADOR){
+    Sems* semaphore = shm_read_process(shmid);
+    meditate(number,type_parlamentar);
+    sem_wait(&semaphore->senador); // Enter Critical Section
+    semaphore->senador_only = 1; //only senator in room
+    enter_room(number,type_parlamentar);
+    vote(number,type_parlamentar);
+    sem_post(&semaphore->senador); // Exit Critical Section
+   }
+  else if(type_parlamentar == DEPUTADO){
+    Sems* semaphore = shm_read_process(shmid);
+    meditate(number,type_parlamentar);
+    while(senador_only!= 1){	
+      sem_wait(&semaphore->deputado);
+      enter_room(number,type_parlamentar);
+      vote(number,type_parlamentar);
+      sem_post(&semaphore->deputado);
+    }				
+  } 		
 }
 
 int main(){
@@ -80,6 +112,9 @@ int main(){
   
   //initiates semaphores 
   sem_init(&semaphore->senador,1,1);
+ 
+  //initiates deputados
+  sem_init(&semaphore->deputado,1,5);
 
   // Creating the 'Senadores'
   for(i=0;i<senador;i++){
@@ -87,15 +122,29 @@ int main(){
     pid = fork();
     if(pid==0){
       number = i;
+      voting_process(number,shm_id,SENADOR);
       break;
     }
   }
-  if(pid==0){
-    voting_process(number,shm_id);
-  }
-  sem_destroy(&semaphore->senador);
+   sem_destroy(&semaphore->senador);
   for(int a = 0; a <senador;a++){
    wait(&status);
   }
+
+  for(i=0;i<deputado;i++){
+    printf("Fork %d\n",i);
+    pid = fork();
+    if(pid==0){
+      number = i;
+      voting_process(number,shm_id,DEPUTADO);
+      break;
+    }
+  }
+ 
+  sem_destroy(&semaphore->deputado);
+  for(int a = 0; a < deputado;a++){
+   wait(&status);
+  }
+
   return 0;
 }
