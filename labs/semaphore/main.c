@@ -24,6 +24,8 @@
 #define SENADOR   1
 #define DEPUTADO  2
 #define VEREADOR  3
+
+
 typedef struct sems{
   sem_t senador;
   sem_t deputado;
@@ -36,13 +38,13 @@ void meditate(int number, int type_parlamentar){
     printf("Eu Senador de número %d pensando aqui na morte da bezerra\n",number);
     srand(time(NULL));
     int time = rand() % 1000;
-    sleep(1);
+    sleep(2);
    }
   else if(type_parlamentar == DEPUTADO){
     printf("Eu deputado de número %d pensando aqui na morte da bezerra\n",number);
     srand(time(NULL));
     int time = rand() % 1000;
-    sleep(1);
+    sleep(4);
   }   
 }
 void enter_room(int number, int type_parlamentar){
@@ -59,11 +61,13 @@ void enter_room(int number, int type_parlamentar){
 void vote(int number, int type_parlamentar){
   if(type_parlamentar == SENADOR){
     printf("Senador de numero %d vota neste momento\n",number);
-    sleep(5);
+    sleep(1);
+    printf("Senador %d saindo da sala ..\n",number);
    }
   else if(type_parlamentar == DEPUTADO){
     printf("Deputado de número %d vota neste momento\n",number);
-    sleep(5);
+    sleep(1);
+    printf("Deputado %d saind da sala...\n",number);
   }
 }
 
@@ -75,27 +79,46 @@ void voting_process(int number, int shmid, int type_parlamentar){
     semaphore->senador_only = 1; //only senator in room
     enter_room(number,type_parlamentar);
     vote(number,type_parlamentar);
-    sem_post(&semaphore->senador); // Exit Critical Section
+    sem_post(&semaphore->senador);
+    semaphore->senador_only = 0;  //free room
+    exit(0);
    }
   else if(type_parlamentar == DEPUTADO){
     Sems* semaphore = shm_read_process(shmid);
-    meditate(number,type_parlamentar);
-    while(senador_only!= 1){	
+    if(semaphore->senador_only!= 1){	
+      meditate(number,type_parlamentar);
       sem_wait(&semaphore->deputado);
       enter_room(number,type_parlamentar);
       vote(number,type_parlamentar);
       sem_post(&semaphore->deputado);
+      exit(0);
     }				
   } 		
+}
+
+void shuffle(int *array, size_t n)
+{
+  if (n > 1) {
+        size_t i;
+  for(i = 0; i < n - 1; i++){
+    size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+    int t = array[j];
+    array[j] = array[i];
+    array[i] = t;
+  }
+ }
 }
 
 int main(){
   srand(time(NULL));
   int senador   = 5;
-  int deputado  = rand() % 50;
+  int deputado  = 7; // rand() % 50;
   int vereador  = rand() % 50;
+  int total = senador + deputado;
+  int array[total]; 
   int i; // counter
   int status;
+  int *total;
   int pid;
   int number;
   key_t key = 5678;
@@ -118,33 +141,43 @@ int main(){
 
   // Creating the 'Senadores'
   for(i=0;i<senador;i++){
-    printf("Fork %d\n",i);
+   // printf("Fork %d\n",i);
     pid = fork();
     if(pid==0){
       number = i;
-      voting_process(number,shm_id,SENADOR);
       break;
+      exit(0);
     }
   }
-   sem_destroy(&semaphore->senador);
+  if(pid == 0){
+   voting_process(number,shm_id,SENADOR);
+  }
   for(int a = 0; a <senador;a++){
    wait(&status);
   }
 
+  sem_destroy(&semaphore->senador);
+  //creating the 'Deputados'
   for(i=0;i<deputado;i++){
-    printf("Fork %d\n",i);
+   // printf("Fork %d\n",i);
     pid = fork();
     if(pid==0){
-      number = i;
-      voting_process(number,shm_id,DEPUTADO);
+      number = i;   
+      //voting_process(number,shm_id,DEPUTADO);
       break;
+      exit(0);
     }
   }
+
+  if(pid == 0){
+    voting_process(number,shm_id,DEPUTADO);
+    exit(0);
+  } 
  
-  sem_destroy(&semaphore->deputado);
   for(int a = 0; a < deputado;a++){
    wait(&status);
   }
-
+          
+  sem_destroy(&semaphore->deputado);
   return 0;
 }
