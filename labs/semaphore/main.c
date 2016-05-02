@@ -1,20 +1,20 @@
 /*
   Requisitos
 
-  [] Senadores não podem entrar na sala simultaneamente
-  [] Ninguem pode entrar na sala qnd um senador estiver votando
-  [] Até 5 deputados podem entrar na sala juntos
-  [] Sem limites para vereadores
-  [] Vereadores e deputados podem entrar juntos
+  [X] Senadores não podem entrar na sala simultaneamente
+  [X] Ninguem pode entrar na sala qnd um senador estiver votando
+  [X] Até 5 deputados podem entrar na sala juntos
+  [X] Sem limites para vereadores
+  [X] Vereadores e deputados podem entrar juntos
 
-  [] Utilizar memória compartilhada e semáforo
+  [X] Utilizar memória compartilhada e semáforo
   [X] Numero de senadores, deputados e vereadores rand
   [X] Cria processos para cada parlamentar (senador, deputado e vereador)
-  [] Antes de entrar na sala deve meditar por 0~1000
-  [] A votação deve ser simulada com 'sleep'
-  [] Pai aguarda todos os processos filhos terminarem
-  [] Após o termino, o pai deve remover o SHM e semáforos
-  [] Logs de acompanhamento das votações
+  [X] Antes de entrar na sala deve meditar por 0~1000
+  [X] A votação deve ser simulada com 'sleep'
+  [X] Pai aguarda todos os processos filhos terminarem
+  [X] Após o termino, o pai deve remover o SHM e semáforos
+  [X] Logs de acompanhamento das votações
 */
 
 #include <stdio.h>
@@ -24,14 +24,13 @@
 #include "comunication.h"
 #include "voting.h"
 
-#define MAX   5
-#define TOTAL senadores+deputados+vereadores
+#define MAX   10
 
 int main(){
   srand(time(NULL));
   int senadores    = rand() % MAX + 1;
-  int deputados    =0;//= rand() % MAX + 1;
-  int vereadores   =0;//= rand() % MAX + 1;
+  int deputados    = rand() % MAX + 20;
+  int vereadores   = rand() % MAX + 50;
 
   int pid;    // forks
   int i,j;    // counter
@@ -46,6 +45,8 @@ int main(){
   semaphore = shm_attach(shm_id);
   sem_init(&semaphore->mutex,1,1);
   sem_init(&semaphore->senador,1,0);
+  sem_init(&semaphore->deputado,1,0);
+  sem_init(&semaphore->vereador,1,0);
 
   semaphore->qnt_s = 0;
   semaphore->qnt_d = 0;
@@ -68,7 +69,6 @@ int main(){
           case SENADOR:   type = SENADOR;   break;
           case DEPUTADO:  type = DEPUTADO;  break;
           case VEREADOR:  type = VEREADOR;  break;}
-        sem_init(&semaphore->parlamentar[p_num-1],1,1);
         number = p_num;
         break;
       }
@@ -87,5 +87,8 @@ int main(){
 
   // Destroing semaphore
   sem_destroy(&semaphore->mutex);
+  sem_destroy(&semaphore->senador);
+  sem_destroy(&semaphore->deputado);
+  sem_destroy(&semaphore->vereador);
   return 0;
 }

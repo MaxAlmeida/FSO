@@ -14,10 +14,12 @@
 typedef struct sems{
   sem_t mutex;
   sem_t senador;
+  sem_t deputado;
+  sem_t vereador;
+
   int qnt_s;
   int qnt_d;
   int qnt_v;
-  sem_t parlamentar[];
 }Sems;
 
 /********************************
