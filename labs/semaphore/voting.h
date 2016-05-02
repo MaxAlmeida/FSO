@@ -22,17 +22,13 @@ void print_type(int number, int type){
 }
 
 /* Checking the room */
-void ck_room(int type){
+void ck_room(int number,int type){
   Sems* semaphore = shm_read_process(shm_id);
-  print_qnt();
   if(type == SENADOR){// Checking for senador
     if(semaphore->qnt_s == 0 &&
       semaphore->qnt_d == 0 &&
       semaphore->qnt_v == 0){// Empty room
-      printf("EMPTY ROOM!\n");
-    }else{// Not empty room
-      printf("NOT EMPTY ROOM!\n");
-      sem_wait(&semaphore->);
+      sem_post(&semaphore->senador);
     }
   }
 }
@@ -51,7 +47,10 @@ void meditate(int number, int type){
 void enter_room(int number, int type){
   Sems* semaphore = shm_read_process(shm_id);
   sem_wait(&semaphore->mutex); // Enter Critical Section
-  ck_room(type);
+  ck_room(number,type);
+  sem_post(&semaphore->mutex); // Exit Critical Section
+  sem_wait(&semaphore->senador);
+
   print_type(number,type);
   printf("entering the room\n");
   switch(type){
@@ -59,7 +58,6 @@ void enter_room(int number, int type){
     case DEPUTADO:  semaphore->qnt_d++; break;
     case VEREADOR:  semaphore->qnt_v++; break;
   }
-  sem_post(&semaphore->mutex); // Exit Critical Section
 }
 
 /* Parlamentar voting... */
@@ -77,7 +75,7 @@ void leaving_room(int number, int type){
   print_type(number,type);
   printf("leaving...\n");
   switch(type){
-    case SENADOR:   semaphore->qnt_s--; break;
+    case SENADOR:   semaphore->qnt_s--; sem_post(&semaphore->senador);break;
     case DEPUTADO:  semaphore->qnt_d--; break;
     case VEREADOR:  semaphore->qnt_v--; break;
   }

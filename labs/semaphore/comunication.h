@@ -13,6 +13,7 @@
 /* Defining the Structure of semaphore */
 typedef struct sems{
   sem_t mutex;
+  sem_t senador;
   int qnt_s;
   int qnt_d;
   int qnt_v;

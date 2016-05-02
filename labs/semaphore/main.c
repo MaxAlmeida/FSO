@@ -45,6 +45,7 @@ int main(){
   shm_id = shm_create (semaphore);
   semaphore = shm_attach(shm_id);
   sem_init(&semaphore->mutex,1,1);
+  sem_init(&semaphore->senador,1,0);
 
   semaphore->qnt_s = 0;
   semaphore->qnt_d = 0;
