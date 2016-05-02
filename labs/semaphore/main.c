@@ -5,10 +5,10 @@
   [] Ninguem pode entrar na sala qnd um senador estiver votando
   [] Até 5 deputados podem entrar na sala juntos
   [] Sem limites para vereadores
-  [] Vereadores e depultados podem entrar juntos
+  [] Vereadores e deputados podem entrar juntos
 
   [] Utilizar memória compartilhada e semáforo
-  [X] Numero de senadores, depultados e vereadores rand
+  [X] Numero de senadores, deputados e vereadores rand
   [X] Cria processos para cada parlamentar (senador, deputado e vereador)
   [] Antes de entrar na sala deve meditar por 0~1000
   [] A votação deve ser simulada com 'sleep'
@@ -21,81 +21,70 @@
 #include <stdlib.h>
 #include <time.h>
 #include <semaphore.h>
-#define SENADOR   1
-#define DEPUTADO  2
-#define VEREADOR  3
-typedef struct sems{
-  sem_t senador;
-  sem_t deputado;
-  int senador_only;
-}Sems;
-
 #include "comunication.h"
-void meditate(int number){
-  printf("Eu processo de numero %d pensando aqui na morte da bezerra\n",number);
+#include "voting.h"
 
-  srand(time(NULL));
-  int time = rand() % 1000;
-  sleep(1);
-}
-void enter_room(int number){
-  printf("Processo de numero %d entra na sala\n",number);
-}
-
-void vote(int number){
-  printf("Processo de numero %d vota neste momento\n",number);
-  sleep(1);
-}
-
-void voting_process(int number, int shmid){ 
-  Sems* semaphore = shm_read_process(shmid);
-  meditate(number);
-  sem_wait(&semaphore->senador); // Enter Critical Section
-  semaphore->senador_only = 1; //only senator in room
-  enter_room(number);
-  vote(number);
-  sem_post(&semaphore->senador); // Exit Critical Section
-}
+#define MAX   5
+#define TOTAL senadores+deputados+vereadores
 
 int main(){
   srand(time(NULL));
-  int senador   = 5;
-  int deputado  = rand() % 50;
-  int vereador  = rand() % 50;
-  int i; // counter
-  int status;
-  int pid;
-  int number;
-  key_t key = 5678;
-  int shm_id;
+  int senadores    = rand() % MAX + 1;
+  int deputados    =0;//= rand() % MAX + 1;
+  int vereadores   =0;//= rand() % MAX + 1;
+
+  int pid;    // forks
+  int i,j;    // counter
+  int status; // waiting
+  int number; // parlamentar number
+  int type;   // parlamentar type
+  
+  // Init semaphore with SHM 
+  printf("Init Semaphore\n");
   Sems *semaphore;
-  
-  //create memmory area
   shm_id = shm_create (semaphore);
- 
-  //atach semaphore to memmory area
   semaphore = shm_attach(shm_id);
+  sem_init(&semaphore->mutex,1,1);
 
- // shm_write_process(semaphore);
+  semaphore->qnt_s = 0;
+  semaphore->qnt_d = 0;
+  semaphore->qnt_v = 0;
   
-  //initiates semaphores 
-  sem_init(&semaphore->senador,1,1);
+  // Creating everyone
+  int total;
+  int p_num = 0;
+  for(i=1;i<=3;i++){
+    switch(i){
+      case SENADOR:   total = senadores;   break;
+      case DEPUTADO:  total = deputados;   break;
+      case VEREADOR:  total = vereadores;  break;}
 
-  // Creating the 'Senadores'
-  for(i=0;i<senador;i++){
-    printf("Fork %d\n",i);
-    pid = fork();
-    if(pid==0){
-      number = i;
-      break;
+    for(j=1;j<=total;j++){
+      p_num++;
+      pid = fork();
+      if(pid==0){
+        switch(i){
+          case SENADOR:   type = SENADOR;   break;
+          case DEPUTADO:  type = DEPUTADO;  break;
+          case VEREADOR:  type = VEREADOR;  break;}
+        sem_init(&semaphore->parlamentar[p_num-1],1,1);
+        number = p_num;
+        break;
+      }
     }
+    if(pid==0) break;
   }
+  // Child 
   if(pid==0){
-    voting_process(number,shm_id);
+    voting_process(number,type);
   }
-  sem_destroy(&semaphore->senador);
-  for(int a = 0; a <senador;a++){
-   wait(&status);
-  }
+
+  // Waiting for all child to end
+  total = senadores + deputados + vereadores; 
+  for(i=0; i<total;i++){
+    wait(&status);}
+
+  // Destroing semaphore
+  sem_destroy(&semaphore->mutex);
   return 0;
 }
