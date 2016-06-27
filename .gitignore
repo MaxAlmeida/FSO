@@ -41,5 +41,6 @@
 modules.order
 Module.symvers
 *.ko.cmd
+.tmp_versions/
 
 prog*
