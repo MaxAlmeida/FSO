@@ -34,4 +34,12 @@
 # Swp
 *.swp
 
+# Kernel modules
+*.o.cmd
+*.mod.c.cmd
+*.mod.c
+modules.order
+Module.symvers
+*.ko.cmd
+
 prog*
