@@ -9,6 +9,7 @@ MODULE_DESCRIPTION("USB Mouse Driver");
 
 static struct usb_device *device;
 
+/* Called on device insertion. Only if no other driver has loaded */
 static int mouse_probe(
     struct usb_interface *interface,
     const struct usb_device_id *id){
@@ -26,7 +27,7 @@ static int mouse_probe(
   printk(KERN_INFO "mouse: ID->bInterfaceClass: %02X\n",
       iface_desc->desc.bInterfaceClass);
 
-  int i;
+  int i = 0;
   for(i=0;i<iface_desc->desc.bNumEndpoints; i++){
     endpoint = &iface_desc->endpoint[i].desc;
     printk(KERN_INFO "mouse: ED [%d]->bEndpointAddress: 0x%02X\n",
@@ -48,8 +49,9 @@ static void mouse_disconnect(
       interface->cur_altsetting->desc.bInterfaceNumber);
 }
 
+/* Define witch device are plug-in */
 static struct usb_device_id mouse_table[]={
-  {USB_DEVICE(0x1516, 0x8628)},
+  {USB_DEVICE(0x046d, 0xc534)}, /* (idVendor, idProduct) */
   {} /* Terminating Entry */
 };
 
@@ -57,7 +59,7 @@ MODULE_DEVICE_TABLE(usb,mouse_table);
 
 /* Identifies USB interface driver to usbcore */
 static struct usb_driver mouse_driver = {
-  name: "My USB Mouse",
+  name: "mymouse",
   id_table: mouse_table,
   probe: mouse_probe,
   disconnect: mouse_disconnect,
