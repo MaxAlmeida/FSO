@@ -1,75 +1,106 @@
 #include <linux/module.h>
-#include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/usb.h>
-#include <linux/err.h>
+#include <linux/fs.h>
+#include <linux/errno.h>
+#include <linux/slab.h>
+#include <linux/device.h>
 
-#define MIN(a,b) (((a)<=(b))?(a):(b))
-#define BULK_EP_IN 0x81
-#define MAX_PKT_SIZE 512
+#define BUF_LEN 18
 
-static struct usb_device *device;
-static struct usb_class_driver class;
-static unsigned char bulk_buf[MAX_PKT_SIZE];
+#define VENDOR_ID   0x046d
+#define PRODUCT_ID  0xc534
 
-/* Open device file */
+/* Global variables */
+static unsigned int device_open = 0;  /* Prevent multiples access */
+static struct usb_device *device;     /* The USB device itself */
+static char msg[BUF_LEN];             /* The msg the device will give */
+static char *msg_ptr;
+static int counter = 0;
+
+/* Define witch device are work with */
+static struct usb_device_id mouse_table[]={
+  {USB_DEVICE(VENDOR_ID, PRODUCT_ID)},
+  {} /* Terminating Entry */
+};
+MODULE_DEVICE_TABLE(usb,mouse_table);
+
+/* Called when a process tries to open the device file
+ * like "cat /dev/FILE" */
 static int mouse_open(
     struct inode *ind,
     struct file *file){
-  return 0;
+
+  if(device_open){
+    printk(KERN_ERR "[%d]Busy!\n", device_open);
+    return -EBUSY;
+  }
+
+  device_open++;
+  sprintf(msg, "[%d]Mouse opened\n", counter++);
+  msg_ptr = msg;
+
+  return 0; /* Return Success */
 }
 
-/* Close device file */
+/* Called when a process closes the device file */
 static int mouse_close(
     struct inode *ind,
     struct file *file){
+  printk(KERN_INFO "[%d]Mouse closed\n", counter);
+  device_open--; /* Release the file to the next call */
   return 0;
 }
 
-/* Reading data from the device */
+/* Called when a process attempts to read */
 static ssize_t mouse_read(
-    struct file *file,
-    char __user *buf,
-    size_t cnt,
-    loff_t *off){
+    struct file *file,  /* File pointer */
+    char *buffer,       /* Buffer to fill with data */
+    size_t length,      /* Length of the buffer*/
+    loff_t *offset){    /* Offset int the file */
 
-  int retval;
-  int read_cnt;
-
-  /* Read the data from the bulk endpoint */
-  retval = usb_bulk_msg(
-      device,
-      usb_rcvbulkpipe(device, BULK_EP_IN),
-      bulk_buf,
-      MAX_PKT_SIZE,
-      &read_cnt,
-      5000);
-
-  if(retval){
-     printk(KERN_ERR "Bulk message returned %d\n",retval);
-     return retval;
+  int bytes_read = 0; /* Number of bytes written to the buffer */
+  if(*msg_ptr == 0){ /* If it's the end of the file */
+    return 0;
   }
-  if(copy_to_user(buf, bulk_buf, MIN(cnt,read_cnt)))
-    return -EFAULT;
 
-  return MIN(cnt, read_cnt);
+  /* Putting the data into the buffer */
+  while(length && *msg_ptr){
+    /* The buffer is in the user data segment
+     * We have to use put_user which copies data from
+     *  the kernel data segment to the user data segment */
+    put_user(*(msg_ptr++), buffer++);
+    length--;
+    bytes_read++;
+  }
+
+  printk(KERN_INFO "mouse: Reading bytes [%d]\n", bytes_read);
+  return bytes_read;
 }
 
-/* Write data to the bulk endpoint. Not usefull for a mouse */
+/* Called when a process writes to dev file
+ * like "hello > /dev/FILE"*/
 static ssize_t mouse_write(
-     struct file *file,
-     const char __user *buf,
-     size_t cnt,
-     loff_t *off){
+    struct file *file,
+    const char *buff,
+    size_t length,
+    loff_t *off){
+
+  printk(KERN_INFO "Operation not supported!\n");
   return -EINVAL;
 }
 
 /* File operation structs */
 static struct file_operations fops = {
-  open: mouse_open,
-  release: mouse_close,
-  read: mouse_read,
-  write: mouse_write,
+  open:     mouse_open,
+  release:  mouse_close,
+  read:     mouse_read,
+  write:    mouse_write,
+};
+
+static struct usb_class_driver usb_class = {
+  name: "usb/mouse%d",
+  fops: &fops,
 };
 
 /* Called on device insertion. Only if no other driver has loaded */
@@ -77,45 +108,33 @@ static int mouse_probe(
     struct usb_interface *interface,
     const struct usb_device_id *id){
 
-  struct usb_host_interface *iface_desc = interface->cur_altsetting;
-  struct usb_endpoint_descriptor *endpoint;
-  int retval;
+  printk(KERN_INFO "mouse: mouse_probe: starting\n");
   device = interface_to_usbdev(interface);
-  class.name = "usb/mouse%d";
-  class.fops = &fops;
 
-  if((retval = usb_register_dev(interface, &class)) < 0)
+  int retval = usb_register_dev(interface, &usb_class);
+  /* Try to register the device */
+  if(retval < 0){
     printk(KERN_ERR "mouse: Not able to get a minor for this device. Error %d", retval);
-  else
+    return retval;
+  }else{
     printk(KERN_INFO "mouse: Minor obtained: %d\n", interface->minor);
+  }
 
   return 0;
 }
 
 /* Called on device remove */
-static void mouse_disconnect(
-    struct usb_interface *interface){
-
-  printk(KERN_INFO "mouse: Mouse i/f %d now disconnected\n",
-      interface->cur_altsetting->desc.bInterfaceNumber);
-  usb_deregister_dev(interface, &class);
+static void mouse_disconnect(struct usb_interface *interface){
+  usb_deregister_dev(interface, &usb_class);
+  dev_info(&interface->dev, "USB Mouse now disconnected\n");
 }
-
-
-/* Define witch device are plug-in */
-static struct usb_device_id mouse_table[]={
-  {USB_DEVICE(0x046d, 0xc534)}, /* (idVendor, idProduct) */
-  {} /* Terminating Entry */
-};
-
-MODULE_DEVICE_TABLE(usb,mouse_table);
 
 /* Identifies USB interface driver to usbcore */
 static struct usb_driver mouse_driver = {
-  name: "mymouse",
-  id_table: mouse_table,
-  probe: mouse_probe,
-  disconnect: mouse_disconnect,
+  name:         "mymouse",
+  id_table:     mouse_table,
+  probe:        mouse_probe,
+  disconnect:   mouse_disconnect,
 };
 
 /* Basic init and exit of the driver */

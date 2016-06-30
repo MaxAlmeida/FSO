@@ -12,11 +12,10 @@ compile:
 	$(MAKE) -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
 install:
-	sudo rmmod usbhid || true
 	sudo insmod $(filter-out $@, $(MAKECMDGOALS)).ko
 
 remove:
-	sudo rmmod $(filter-out $@, $(MAKECMDGOALS)) || true
+	sudo rmmod $(filter-out $@, $(MAKECMDGOALS))
 
 clean:
 	$(MAKE) -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
