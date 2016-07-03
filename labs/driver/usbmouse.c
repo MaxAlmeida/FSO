@@ -5,8 +5,9 @@
 #include <linux/errno.h>
 #include <linux/slab.h>
 #include <linux/device.h>
-
+#include <linux/hid.h>
 #define BUF_LEN 18
+#include <linux/usb/input.h>
 
 #define VENDOR_ID   0x046d
 #define PRODUCT_ID  0xc534
@@ -25,12 +26,60 @@ static struct usb_device_id mouse_table[]={
 };
 MODULE_DEVICE_TABLE(usb,mouse_table);
 
+struct usb_mouse{
+  char name[128];
+  char phys[64];
+  struct input_dev *dev;
+  struct urb *irq;
+  struct usb_device *usbdev;
+  signed char *data;
+  dma_addr_t data_dma;
+
+
+};
+
+static void usb_mouse_irq(struct urb *urb)
+{
+          struct usb_mouse *mouse = urb->context;
+          signed char *data = mouse->data;
+          struct input_dev *dev = mouse->dev;
+          int status;
+  
+          switch (urb->status) {
+          case 0:                 /* success */
+                  break;
+          case -ECONNRESET:       /* unlink */
+          case -ENOENT:
+          case -ESHUTDOWN:
+                  return;
+          /* -EPIPE:  should clear the halt */
+          default:                /* error */
+                  goto resubmit;
+          }
+  
+          input_report_key(dev, BTN_LEFT,   data[0] & 0x01);
+          input_report_key(dev, BTN_RIGHT,  data[0] & 0x02);
+          input_report_key(dev, BTN_MIDDLE, data[0] & 0x04);
+          input_report_key(dev, BTN_SIDE,   data[0] & 0x08);
+          input_report_key(dev, BTN_EXTRA,  data[0] & 0x10);
+  
+          input_report_rel(dev, REL_X,     data[1]);
+          input_report_rel(dev, REL_Y,     data[2]);
+          input_report_rel(dev, REL_WHEEL, data[3]);
+  
+          input_sync(dev);
+  resubmit:
+          status = usb_submit_urb (urb, GFP_ATOMIC);
+          if (status)
+                  dev_err(&device->dev,
+                          "can't resubmit intr, %s-%s/input0, status %d\n",
+                          device->bus->bus_name,
+                          device->devpath, status);
+  }
 /* Called when a process tries to open the device file
  * like "cat /dev/FILE" */
-static int mouse_open(
-    struct inode *ind,
-    struct file *file){
-
+static int mouse_open(struct input_dev *dev){
+  struct usb_mouse *mouse = input_get_drvdata(dev);  
   if(device_open){
     printk(KERN_ERR "[%d]Busy!\n", device_open);
     return -EBUSY;
@@ -39,16 +88,21 @@ static int mouse_open(
   device_open++;
   sprintf(msg, "[%d]Mouse opened\n", counter++);
   msg_ptr = msg;
-
+  
+  mouse->irq->dev = mouse->usbdev;
+  if(usb_submit_urb(mouse->irq, GFP_KERNEL))
+     return -EIO;
   return 0; /* Return Success */
 }
 
 /* Called when a process closes the device file */
-static int mouse_close(
-    struct inode *ind,
-    struct file *file){
+static int mouse_close( struct input_dev *dev){
   printk(KERN_INFO "[%d]Mouse closed\n", counter);
   device_open--; /* Release the file to the next call */
+
+  struct usb_mouse *mouse = input_get_drvdata(dev);
+  usb_kill_urb(mouse->irq);
+
   return 0;
 }
 
@@ -107,10 +161,15 @@ static struct usb_class_driver usb_class = {
 static int mouse_probe(
     struct usb_interface *interface,
     const struct usb_device_id *id){
-
+  struct usb_endpoint_descriptor *endpoint;
   printk(KERN_INFO "mouse: mouse_probe: starting\n");
   device = interface_to_usbdev(interface);
-
+  struct usb_mouse *mouse;
+  struct input_dev *input_dev;
+  int pipe, maxp;
+  
+  pipe = usb_rcvintpipe(device, endpoint->bEndpointAddress);
+  maxp = usb_maxpacket(device, pipe, usb_pipeout(pipe));
   int retval = usb_register_dev(interface, &usb_class);
   /* Try to register the device */
   if(retval < 0){
@@ -119,7 +178,45 @@ static int mouse_probe(
   }else{
     printk(KERN_INFO "mouse: Minor obtained: %d\n", interface->minor);
   }
+ 
+  mouse = kzalloc(sizeof(struct usb_mouse), GFP_KERNEL);
+  input_dev = input_allocate_device();
+  //fail1
+  
+  mouse-> data = usb_alloc_coherent(device, 8, GFP_ATOMIC, &mouse->data_dma);
+  //fail1
 
+  mouse->irq = usb_alloc_urb(0, GFP_KERNEL);
+  
+  mouse-> usbdev = device;
+  mouse->dev = input_dev;
+  
+  usb_make_path(device, mouse->phys, sizeof(mouse->phys));
+  strlcat(mouse->phys, "/input0", sizeof(mouse->phys));
+
+  input_dev-> name = "mOUSE LOUCO";  
+  
+  usb_to_input_id(device, &input_dev->id);
+  input_dev->dev.parent = &interface->dev;
+
+  input_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_REL);
+  input_dev->keybit[BIT_WORD(BTN_MOUSE)] = BIT_MASK(BTN_LEFT) |
+	BIT_MASK(BTN_RIGHT) | BIT_MASK(BTN_MIDDLE);
+  input_dev->relbit[0] = BIT_MASK(REL_X) | BIT_MASK(REL_Y);
+  input_dev->keybit[BIT_WORD(BTN_MOUSE)] |= BIT_MASK(BTN_SIDE) |
+ 	BIT_MASK(BTN_EXTRA);
+  input_dev->relbit[0] |= BIT_MASK(REL_WHEEL);
+  
+  input_set_drvdata(input_dev, mouse); 
+  input_dev ->open = mouse_open;
+  input_dev->close = mouse_close;
+
+  usb_fill_int_urb(mouse->irq,device,pipe, mouse->data,(maxp > 8 ? 8 : maxp),usb_mouse_irq, mouse, endpoint->bInterval);
+  
+  mouse->irq->transfer_dma = mouse->data_dma;
+  mouse->irq->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
+
+  usb_set_intfdata(interface, mouse);
   return 0;
 }
 
