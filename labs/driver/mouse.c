@@ -1,6 +1,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/slab.h>
+#include <linux/kref.h>
 #include <linux/usb.h>
 #include <linux/fs.h>
 
@@ -10,7 +11,10 @@
 
 /* Called when a process tries to open the device file
  * like "cat /dev/FILE" */
-static int mouse_open(struct inode *ind, struct file *file);
+static int mouse_open(struct inode *ind, struct file *pfile);
+
+/* Called when a process closes the device file */
+static int mouse_close(struct inode *ind, struct file *pfile);
 
 /* Called on device insertion
  * Contains all the initializations of the driver */
@@ -29,6 +33,7 @@ static struct usb_device_id mouse_table [] = {
 /* Define the file operations functions */
 static struct file_operations fops = {
   open:       mouse_open,
+  release:    mouse_close,
 };
 
 /* identifies a USB driver that wants to use the USB major number */
@@ -48,10 +53,12 @@ static struct usb_driver mouse_driver = {
 /* Defining a local device structure
  * One structure for each connected device */
 struct usb_mouse {
-  int *int_in_buffer;
-  int int_in_size;
-  int int_in_endpointAddr;
   struct usb_device *udev;
+  struct usb_interface *interface;
+  unsigned char *int_in_buffer;
+  size_t int_in_size;
+  __u8 int_in_endpointAddr;
+  struct kref kref;
 };
 
 #ifdef MODULE
@@ -102,9 +109,8 @@ static int mouse_probe(
 
   int i = 0;
   int retval = 0;
-  int buffer_size;
+  size_t buffer_size;
   char *buff;
-  char *user_buffer;
 
   struct urb *mouse_urb;
   struct usb_mouse *dev;
@@ -113,6 +119,7 @@ static int mouse_probe(
 
   /* Set up the endpoint informations */
   dev = kmalloc(sizeof(struct usb_mouse),GFP_KERNEL);
+  memset(dev, 0x00, sizeof (*dev));
   iface_desc = interface->cur_altsetting;
   for (i = 0; i < iface_desc->desc.bNumEndpoints; ++i) {
     endpoint = &iface_desc->endpoint[i].desc;
@@ -199,8 +206,8 @@ static void mouse_disconnect(
 }
 
 static int mouse_open(
-    struct inode *inode,
-    struct file *file){
+    struct inode *ind,
+    struct file *pfile){
 
   struct usb_mouse *dev;
   struct usb_interface *interface;
@@ -208,7 +215,7 @@ static int mouse_open(
   int retval;
 
   printk(KERN_INFO "Opening mouse\n");
-  subminor = iminor(inode);
+  subminor = iminor(ind);
   interface = usb_find_interface(&mouse_driver, subminor);
   if(!interface){
     printk(KERN_ERR "Can't find device for minor %d\n", subminor);
@@ -222,8 +229,24 @@ static int mouse_open(
     goto exit;
   }
 
+  /* save our object in the file's private structure */
+  pfile->private_data = dev;
+
 exit:
   return retval;
+}
+
+static int mouse_close(
+    struct inode *ind,
+    struct file *pfile){
+
+  struct usb_mouse *dev;
+
+  printk(KERN_INFO "Releasing mouse!\n");
+  dev = (struct usb_mouse *)pfile->private_data;
+  if (dev == NULL) return -ENODEV;
+
+  return 0;
 }
 
 MODULE_LICENSE("GPL");
