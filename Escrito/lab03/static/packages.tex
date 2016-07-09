@@ -7,11 +7,18 @@
 \usepackage{color}				% Color controll
 \usepackage{graphicx}			% Graphics inclusion
 \usepackage{float}
-
 \usepackage{units}
 \usepackage{lastpage}
 \usepackage{lmodern}
 \usepackage{eso-pic}
-
-\usepackage[alf]{abntex2cite}					% ABNT citation patter
+\usepackage{listings}
+\usepackage[alf]{abntex2cite}
+\usepackage{newunicodechar}
+\newunicodechar{±}{\pm}					% ABNT citation patter
 \usepackage[brazilian,hyperpageref]{backref} 	% Pages with citations
+\lstset{%
+basicstyle=\ttfamily\color{black},
+commentstyle = \ttfamily\color{red},
+keywordstyle=\ttfamily\color{blue},
+stringstyle=\color{orange}}
+\DeclareUnicodeCharacter{00A0}{ }
