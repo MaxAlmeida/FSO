@@ -28,9 +28,9 @@ Na construção de um \textit{device driver}, é importante esclarecer dois conc
 
 \begin{figure}[H]
   \centering
+  \includegraphics[width=0.3\textwidth]{figure/kernel.eps}
   \caption{\textit{User Space} onde as aplicações residem, e \textit{Kernel Space} onde modulos e \textit{device drivers} residem }
   \label{fig:usblinux}
-  \includegraphics[width=0.3\textwidth]{figure/kernel.eps}
 \end{figure}
 
 Em resumo, kernel oferece subrotinas ou funções para as aplicações \textit{end-user} para interagir
@@ -38,6 +38,7 @@ com o \textit{hardware} (user space), mas também oferece funções para a comun
 com o \textit{hardware} (kernel space).
 
 \subsubsection{USB Driver}
+\label{driverusb}
 
 Em um sistema operacional Linux, um dispositivo USB sempre será detectado quando inserido.
 A detecção em nível de \textit{hardware} é feito pela controladora de USB - \textit{USB Host Controller}. A controladora
@@ -48,9 +49,9 @@ do kernel. Nesse ponto, o device é detectado mesmo sem haver um \textit{driver}
 
 \begin{figure}[H]
   \centering
+  \includegraphics[width=0.9\textwidth]{figure/usbgeral.eps}
   \caption{Camadas do sistema USB Linux}
   \label{fig:usblinux}
-  \includegraphics[width=0.9\textwidth]{figure/usbgeral.eps}
 \end{figure}
 
 A camada de USB core se comunica com o dispositivo utilizando os \textit{urb} que é descrito com uma estrutura
@@ -85,9 +86,9 @@ estrutura.
 
 \begin{figure}[H]
   \centering
+  \includegraphics[width=0.9\textwidth]{figure/usbdevice.eps}
   \caption{Estrutura de um dispositivo.}
   \label{fig:usbdevice}
-  \includegraphics[width=0.9\textwidth]{figure/usbdevice.eps}
 \end{figure}
 
 Na seção \ref{utils} será mostrado algumas aplicações e comandos que são utilizados para identificar
@@ -95,6 +96,34 @@ as informações de um dispositivo USB.
 
 
 \subsection{Vírus}
+
+\begin{itemize}
+  \item \textbf{Vírus de \textit{Boot}}: o vírus de boot foi um dos primeiros vírus a surgirem no mundo,
+    ele foi criado com o objetivo de danificar o setor de inicialização do disco rígido,
+    no qual a sua forma de propagação era através de um disquete contaminado. O vírus se
+    alojava no primeiro setor do disco flexível e ocupava cerca de 1k ou menos em um
+    disquete que era de 360k mais ou menos. Na inicialização do boot com o disquete
+    contaminado, o vírus se aloja na memória no endereço 0000:7C00h da bios e começa
+    a se auto-executar , prejudicando assim a inicialização do computador
+
+  \item \textbf{Vírus de Macro}: o vírus macro encontrado-se frequentemente em documentos ou é
+    inserido em códigos maliciosos em programas de processamento de texto, podendo ter
+    origem em docs anexados ou em e-mails, no qual o vírus pode ser transferido para o
+    computador depois de clicar em ligações de “phishing” ou mesmo em propagandas. Esses
+    vírus são difíceis de serem identificados e o seu maior risco é que tem uma grande
+    capacidade de se propagar, no qual eles podem causar danificações nos documentos infectados.
+\end{itemize}
+
+Maior parte dos vírus criados são desenvolvidos para a plataforma Windows, pois esse sistema operacional
+é mais vulnerável porque ele não trabalha com múltiplos usuários nem com permissões de arquivos. Já a plataforma
+Linux tem as definições bem claras sobre as permissões de arquivos, usuários e grupos, assim quando um SO Linux é
+afetado por um vírus ele afetará somente o usuário que executou o programa, ao contrário do Windows, onde o que estiver
+sendo executado acaba sendo afetado também pelos vírus. Assim, mesmo existindo vírus para o sistema operacional Linux, eles
+só são propagados se forem executados por roots, assim eles não podem se espalhar remotamente, no qual afeta arquivos binários
+na máquina ou disponíveis através de NFS.
+
+%\lstinputlisting{virus.c}
+%\end{lstlisting}
 
 \section{Descrição do Problema}
 
@@ -132,7 +161,7 @@ seu status de implementação da solução proposta.
 \begin{itemize}
   \item (OK ) Estudo sobre Vírus: tipos de vírus e vermes, como eles se disseminam;
   \item (OK) Estudo sobre \textit{Device Drivers}: funcionamento e como construir;
-  \item (OK) Tutorial da construção do \textit{Device Drivers} (Anexo A);
+  \item (OK) Tutorial da construção do \textit{Device Drivers};
   \item (  ) Propor um \textit{Device Drive} com duas forma de funcionamento: normal e anormal;
   \item (OK) O \textit{Device Drive} deve ser gerenciado por lsmdo, insmod, rmmod;
   \item (OK) O \textit{Device Drive} deve apresentar na tela o que está ocorrendo;
@@ -160,7 +189,7 @@ de realizar as mesmas ações providas pelo \textit{modprobe} pela interface de 
 Utilizando o comando lsmod, é possível ver quais os módulos que estão carregados. Geralmente são
 os módulos que já estão contido no kernel e pode variar de acordo com a distribuição e versão do
 kernel. Quando um dispositivo é inserido, seja por USB ou qualquer outra entrada, um driver irá
-ser associado com ele caso exista. O código \ref{lsmod} mostra um exemplo de \textit{output} do comando.
+ser associado com ele caso exista. O código \ref{code:lsmod} mostra um exemplo de \textit{output} do comando.
 
 \lstset{style=terminal}
 \lstinputlisting[language=Bash, label=code:lsmod, caption="Comando lsmod"]{code/lsmod}
@@ -199,9 +228,12 @@ dispositívos que o driver irá suportar.
 \input{edit/descricao}
 
 \section{Conclusão}
-O desenvolvimento deste trabalho apresentou para os integrantes deste grupo um grande desafio. Os resultados obtidos não são os desejados
-mas durante a elaboração deste trabalho o processo de aprendizado foi de grande valia para os membros deste grupo. Assim, os integrantes teve o compreendimento
-do quão difícil e complexo é o desenvolvimento de \textit{device drivers}. Deste modo, pode se chegar a conclusão que os resultados colaboram mais no processo de aprendizagem do que de algo proveitoso em si. 
+O desenvolvimento deste trabalho apresentou para os integrantes deste grupo um grande
+desafio. Os resultados obtidos não são os desejados mas durante a elaboração deste trabalho
+o processo de aprendizado foi de grande valia para os membros deste grupo. Assim, os
+integrantes teve o compreendimento do quão difícil e complexo é o desenvolvimento de
+\textit{device drivers}. Deste modo, pode se chegar a conclusão que os resultados colaboram mais
+no processo de aprendizagem do que de algo proveitoso em si.
 %TODO: opniões sobre o projetom
 %   Dificuldades
 %   Lições aprendidas
@@ -213,81 +245,4 @@ do quão difícil e complexo é o desenvolvimento de \textit{device drivers}. De
 %TODO: Anexo contendo:
 %   Descrição sobre tipos de virus: virus de setor de boot e virus de macro
 %   Alternativas de proteção
-
-\section{Anexos}
-\subsection{Manipulação de Device drivers}
-Aplicações executados no \textit{User space} interagem com o hardware atraves de funções suportadas
-pelo kernel. Assim, geralmente essas funções são voltadas para leitura e escrita de arquivos, dado que um
-device driver, do ponto de vista do usuário, são vistos como arquivos. No lado do kernel, também
-existem funções análogas voltadas para interação direta com hardware de modo que a informação deste
-possa ser enviado as aplicações no espaço de usuário. A imagem a seguir apresenta uma relação de algumas
-funções do espaço do usuário e no espaço do kernel.
-
-\begin{figure}[H]
-  \centering
-  \caption{ Eventos de \textit{device drivers} associados com funções de interface entre o \textit{kernel} e \textit{user space} }.
-  \label{fig:usblinux}
-  \includegraphics[width=0.9\textwidth]{figure/tabela.eps}
-\end{figure}
-
-Assim, por exemplo no espaço do usuário, para instalar o módulo é feita a chamada a função \textbf{insmod} passando
-como argumento o módulo a ser carregado. Em seguida, no lado do kernel é chamada a função \textbf{module\_init()} de
-modo que assim alguma tarefas , como reservar memória ram e portas de entrada e saída são executadas.
-Por outro lado, para a remoçao de um módulo é feita a chamada de função \textbf{rmmod} passando como argumento
-o módulo a ser removido, no lado do \textit{kernel} é chamada a função \textbf{module\_exit()}, liberando assim os recursos
-de hardware alocados anteriormente. O codigo a seguir apresenta um \textit{hello word} tipico de \textit{device driver}.
-
-\begin{figure}[H]
-  \centering
-  \caption{ Um \textit{Hello World} típico de \textit{device driver} }
-  \label{fig:usblinux}
-  \includegraphics[width=0.5\textwidth]{figure/codigo.eps}
-\end{figure}
-
-Nas linhas de 1 a 3 são incluídas as bibliotecas utilizadas para uso de funções necessárias para 
-construção de device drivers. Os métodos \textbf{hello\_init} e \textbf{hello\_exit} são executados quando um módulo 
-é instalado e removido respectivamente. Destaca-se que esse métodos são passado para funções \textbf{ module\_init}
-e \textbf{module\_exit} como argumento para que os mesmos sejam executados nessas operações ( instalação e 
-remoção de módulos). Outro destaque é uso da função \textit{printk}, essa função possui ação semelhante a do \textit{printf}, 
-entretanto ela típica do \textit{kernel} e imprime apenas nos arquivos de \textit{log} do sistema. Para compilação do código é
-necessário o uso de Makefile com as seguintes linhas de código:
-
-\begin{figure}[H]
-  \centering
-  \caption{ \textit{Makefile} utilizado para o programa \textit{hello.c} }
-  \label{fig:usblinux}
-  \includegraphics[width=0.9\textwidth]{figure/makefile.eps}
-\end{figure}
-
-\subsection{Vírus}
-
-\begin{itemize}
-  \item \textbf{Vírus de \textit{Boot}}: o vírus de boot foi um dos primeiros vírus a surgirem no mundo,
-    ele foi criado com o objetivo de danificar o setor de inicialização do disco rígido,
-    no qual a sua forma de propagação era através de um disquete contaminado. O vírus se
-    alojava no primeiro setor do disco flexível e ocupava cerca de 1k ou menos em um
-    disquete que era de 360k mais ou menos. Na inicialização do boot com o disquete
-    contaminado, o vírus se aloja na memória no endereço 0000:7C00h da bios e começa
-    a se auto-executar , prejudicando assim a inicialização do computador
-
-  \item \textbf{Vírus de Macro}: o vírus macro encontrado-se frequentemente em documentos ou é
-    inserido em códigos maliciosos em programas de processamento de texto, podendo ter
-    origem em docs anexados ou em e-mails, no qual o vírus pode ser transferido para o
-    computador depois de clicar em ligações de “phishing” ou mesmo em propagandas. Esses
-    vírus são difíceis de serem identificados e o seu maior risco é que tem uma grande
-    capacidade de se propagar, no qual eles podem causar danificações nos documentos infectados.
-\end{itemize}
-
-Maior parte dos vírus criados são desenvolvidos para a plataforma Windows, pois esse sistema operacional
-é mais vulnerável porque ele não trabalha com múltiplos usuários nem com permissões de arquivos. Já a plataforma
-Linux tem as definições bem claras sobre as permissões de arquivos, usuários e grupos, assim quando um SO Linux é
-afetado por um vírus ele afetará somente o usuário que executou o programa, ao contrário do Windows, onde o que estiver
-sendo executado acaba sendo afetado também pelos vírus. Assim, mesmo existindo vírus para o sistema operacional Linux, eles
-só são propagados se forem executados por roots, assim eles não podem se espalhar remotamente, no qual afeta arquivos binários
-na máquina ou disponíveis através de NFS.
-
-%\lstinputlisting{virus.c}
-
-
-%\end{lstlisting}
 
