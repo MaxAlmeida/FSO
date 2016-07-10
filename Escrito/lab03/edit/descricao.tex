@@ -1,0 +1,15 @@
+
+\section{Descrição da Solução}
+
+A solução proposta consta com a leitura de um device driver para um mouse USB.
+No estado atual do driver é possível reconhecer uma ação provida pelo mouse.
+Essa ação pode ser um click ou a movimentação do mouse que causa uma interrupção
+utilizando urb.
+
+Quebrando a construção do código em três partes principais: inicialização do módulo
+kernel, identificação dos dispositivos USB e operações de entrada e saída dos dados
+do dispositívos (a terceira não foi implementada sendo considerado uma melhoria para
+um trabalho futuro).
+
+Começando pela inicialização do driver. Todos e qualquer driver necessita do registro do
+driver no sistema operacional.

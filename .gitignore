@@ -43,4 +43,11 @@ Module.symvers
 *.ko.cmd
 .tmp_versions/
 
+# Text
+*.pdf
+*.aux
+*.ps
+*.dvi
+*.log
+
 prog*

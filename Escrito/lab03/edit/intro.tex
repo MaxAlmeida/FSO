@@ -94,8 +94,7 @@ Na seção \ref{utils} será mostrado algumas aplicações e comandos que são u
 as informações de um dispositivo USB.
 
 
-
-
+\subsection{Vírus}
 
 \section{Descrição do Problema}
 
@@ -141,10 +140,63 @@ seu status de implementação da solução proposta.
   \item (  ) Executar o programa várias vezes e criar um quadro adequado para apresetar os resultados;
 \end{itemize}
 
-\section{Descrição da Solução}
+\section{Comandos de Suporte}
+\label{utils}
+Durante a construção de um \textit{device driver} existem algumas aplicações e comandos que facilitam
+a obtenção de informações sobre o dispositivo e o \textit{driver}.
 
-A solução proposta consta com a leitura de um device driver para um mouse USB.
+Alguns comandos providos pelo sistema são utilizados para gerenciar os módulos do kernel.
+O \textit{modprobe} é o principal utilizado para a gerencia do módulo. Quando necessário, é possível
+remover e instalar módulos padrões do kernel. Algumas flags são necessárias para especificar
+algumas ações a serem realizadas, como: \textit{modprobe -r <MODULE\_NAME>} para remoção ou 
+\textit{modprobe -rf <MODULE\_NAME>} para forçar a remoção de um módulo. Fique atento, pois, mesmo
+com a utilização da flag -f o módulo pode não ser removido devido a alguma construção errada
+do \textit{driver}.
 
+Outros mais simplificados também podem ser utilizados para gerenciar os módulos: \textit{lsmod, insmod, rmmode}
+que são, respectivamente, listagem, inserção e remoção de modulos. São formas simplificadas
+de realizar as mesmas ações providas pelo \textit{modprobe} pela interface de usuário.
+
+Utilizando o comando lsmod, é possível ver quais os módulos que estão carregados. Geralmente são
+os módulos que já estão contido no kernel e pode variar de acordo com a distribuição e versão do
+kernel. Quando um dispositivo é inserido, seja por USB ou qualquer outra entrada, um driver irá
+ser associado com ele caso exista. O código \ref{lsmod} mostra um exemplo de \textit{output} do comando.
+
+\lstset{style=terminal}
+\lstinputlisting[language=Bash, label=code:lsmod, caption="Comando lsmod"]{code/lsmod}
+
+Utilize esse comando quando realizar a inserção do módulo para garantir que ele foi carregado
+corretamente. Para a inserção dos módulos utiliza-se o comando \textit{insmod}. O argumento principal desse
+comando é o arquivo compilado do módulo kernel que tem a extensão .ko.
+
+\lstset{style=terminal}
+\lstinputlisting[language=Bash, label=code:insmod, caption="Comando insmod"]{code/insmod}
+
+Também é possível carregar módulos do kernel com a utlização do comando \textit{modprobe}. No caso, utiliza-se
+esse comando quando o módulo pertence ao kernel. Por exemplo: \textit{modprobe usbhid} irá carregar o módulo
+\textit{usbhid}, nesse caso não é necessário passar o compilado do módulo.
+
+O comando \textit{rmmod} funciona da mesma maneira que o \textit{insmod}, mas para a remoção do módulo.
+
+\lstset{style=terminal}
+\lstinputlisting[language=Bash, label=code:rmmod, caption="Comando rmmod"]{code/rmmod}
+
+Com esses três comandos podemos gerenciar com facilidade os módulos do kenel.
+Antes de realizar qualquer ação com o módulo, precisamos entender com quais \textit{devices} usbs vamos
+lidar.Temos um comando utilizado para recuperar
+informações como as \textit{interfaces e endpoints} que são importantes na construção de um device.
+O comando \textit{lsusb} realiza essa função utilizando algumas \textit{flags} para mostrar mais informações.
+O código \ref{code:lsusb} mostra um exemplo da lista de todos os módulos conectádos e uma
+forma de mostrar mais informações sobre um dispositívo que tem VENDORID e PRODUCTID. Esses
+dados são específicos do dispositivo e são utilizados no drive para identificar quais
+dispositívos que o driver irá suportar.
+
+\lstset{style=terminal}
+\lstinputlisting[language=Bash, label=code:lsusb, caption="Comando lsusb"]{code/lsusb}
+
+% wireshark
+
+\input{edit/descricao}
 
 \section{Conclusão}
 O desenvolvimento deste trabalho apresentou para os integrantes deste grupo um grande desafio. Os resultados obtidos não são os desejados

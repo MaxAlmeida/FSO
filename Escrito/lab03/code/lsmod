@@ -1,0 +1,7 @@
+ $ lsmod
+ Module                  Size  Used by
+ usb_storage            56215  0 
+ bnep                   17431  2 
+ bluetooth             374429  5 bnep
+ 6lowpan_iphc           16588  1 bluetooth
+ ...
