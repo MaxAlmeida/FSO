@@ -122,6 +122,9 @@ sendo executado acaba sendo afetado também pelos vírus. Assim, mesmo existindo
 só são propagados se forem executados por roots, assim eles não podem se espalhar remotamente, no qual afeta arquivos binários
 na máquina ou disponíveis através de NFS.
 
+\lstset{style=shell}
+\lstinputlisting[language=C,firstline=102,lastline=106, label=code:input, caption="Capturação de eventos utilizando a biblioteca \textit{<linux/input.h>}"]{../../labs/driver/usbmouse.c}
+
 %\lstinputlisting{virus.c}
 %\end{lstlisting}
 
@@ -210,7 +213,7 @@ O comando \textit{rmmod} funciona da mesma maneira que o \textit{insmod}, mas pa
 \lstset{style=terminal}
 \lstinputlisting[language=Bash, label=code:rmmod, caption="Comando rmmod"]{code/rmmod}
 
-Com esses três comandos podemos gerenciar com facilidade os módulos do kenel.
+Com esses três comandos podemos gerenciar com facilidade os módulos do kernel.
 Antes de realizar qualquer ação com o módulo, precisamos entender com quais \textit{devices} usbs vamos
 lidar.Temos um comando utilizado para recuperar
 informações como as \textit{interfaces e endpoints} que são importantes na construção de um device.
