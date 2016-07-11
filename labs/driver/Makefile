@@ -3,10 +3,10 @@ all:
 	@echo 'Usage: make <command>'
 	@echo
 	@echo 'Commands:'
-	@echo '  compile <file.o>	Generates the driver executable'
-	@echo '  install <file.ko> 	Install the driver'
-	@echo '  remove <DRIVER_NAME> 	Remove the driver'
-	@echo '  clean 		Clean the generated files'
+	@echo '  compile FILE=<FILE_NAME> 	Generates the driver executable'
+	@echo '  install <FILE_NAME> 	 	Install the driver'
+	@echo '  remove <DRIVER_NAME> 	 	Remove the driver'
+	@echo '  clean 			Clean the generated files'
 
 compile:
 	$(MAKE) -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
