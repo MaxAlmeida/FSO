@@ -10,7 +10,7 @@ Usage: make <command>
 
 Commands:
 
- compile	           Generates the driver executable
+ compile FILE=<FILE_NAME>	           Generates the driver executable
  install <FILE_NAME>            Install the driver
  remove <DRIVER_NAME>           Remove the driver
  clean                     Clean the generated files 
@@ -21,7 +21,7 @@ Commands:
 
 Compile device driver
 ```
-$ make compile mouse
+$ make compile FILE=mouse
 ```
 
 Install modules
